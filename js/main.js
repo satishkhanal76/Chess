@@ -12,16 +12,16 @@ modal.style.display = "none";
 
 let boardGUI = new BoardGUI(game, modal);
 
-document.addEventListener("dblclick", (eve) => {
-  if (GAME_VARIANT === "CLASSICAL") {
-    game = new Game(new TwoQueenVariant());
-    boardGUI.removeBoard();
-    boardGUI = new BoardGUI(game, modal);
-    GAME_VARIANT = "TWO_QUEEN";
-  } else if (GAME_VARIANT === "TWO_QUEEN") {
-    game = new Game(new ClassicalVariant());
-    boardGUI.removeBoard();
-    boardGUI = new BoardGUI(game, modal);
-    GAME_VARIANT = "CLASSICAL";
-  }
-});
+// document.addEventListener("dblclick", (eve) => {
+//   if (GAME_VARIANT === "CLASSICAL") {
+//     game = new Game(new TwoQueenVariant());
+//     boardGUI.removeBoard();
+//     boardGUI = new BoardGUI(game, modal);
+//     GAME_VARIANT = "TWO_QUEEN";
+//   } else if (GAME_VARIANT === "TWO_QUEEN") {
+//     game = new Game(new ClassicalVariant());
+//     boardGUI.removeBoard();
+//     boardGUI = new BoardGUI(game, modal);
+//     GAME_VARIANT = "CLASSICAL";
+//   }
+// });

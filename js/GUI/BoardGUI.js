@@ -165,7 +165,9 @@ export class BoardGUI {
     }
 
     this.updateCheckStyling();
-    this.flipBoard();
+    if (data) {
+      this.flipBoard();
+    }
 
     return data;
   }
