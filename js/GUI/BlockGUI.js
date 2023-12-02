@@ -11,6 +11,9 @@ export class BlockGUI {
   #isAnimationBlock;
   #textFadeInTime = 180;
 
+  static BLOCK_WIDTH = 50;
+  static BLOCK_HEIGHT = 50;
+
   constructor(fileRank, boardGUI, colour) {
     this.#fileRank = fileRank;
 

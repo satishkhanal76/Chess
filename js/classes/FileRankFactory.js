@@ -53,7 +53,7 @@ export default class FileRankFactory {
     FileRankFactory.#fileRankFactoryInstance = undefined;
   }
 
-  static #convertRowToRank(row) {
+  static convertRowToRank(row) {
     const baordHeight = 7;
 
     let rowRank = row - baordHeight;
@@ -63,14 +63,14 @@ export default class FileRankFactory {
     return rowRank + 1;
   }
 
-  static #convertColToFile(col) {
+  static convertColToFile(col) {
     const charCode = 97 + col;
     return String.fromCharCode(charCode);
   }
 
   static convertToFileRank(col, row) {
-    const file = FileRankFactory.#convertColToFile(col);
-    const rank = FileRankFactory.#convertRowToRank(row);
+    const file = FileRankFactory.convertColToFile(col);
+    const rank = FileRankFactory.convertRowToRank(row);
 
     return file.concat(rank);
   }

@@ -23,6 +23,11 @@ export class BoardGUI {
 
   #flipped;
 
+  #ranks = [];
+  #files = [];
+
+  #boardContainerElement;
+
   constructor(game, modal) {
     this.#flipped = false;
     this.#game = game;
@@ -30,12 +35,9 @@ export class BoardGUI {
 
     this.#modal = modal;
 
-    this.#element = document.createElement("div");
-    this.#element.classList.add("board");
-    this.#element.id = "board";
-    document.getElementById("board-container").appendChild(this.#element);
-
     this.#commandsDisabled = false;
+
+    this.createBoard();
 
     this.#createBlocks();
     this.updateBoard();
@@ -43,12 +45,85 @@ export class BoardGUI {
     this.setupButtons();
   }
 
+  createBoard() {
+    this.#boardContainerElement = document.getElementById("board-container");
+    //create the board
+    this.#element = document.createElement("div");
+    this.#element.classList.add("board");
+    this.#element.id = "board";
+
+    this.#boardContainerElement.style.setProperty(
+      "--block-width",
+      BlockGUI.BLOCK_WIDTH + "px"
+    );
+    this.#boardContainerElement.style.setProperty(
+      "--block-height",
+      BlockGUI.BLOCK_HEIGHT + "px"
+    );
+
+    //create the ranks thing
+    const ranks = document.createElement("div");
+    ranks.classList.add("ranks-container");
+
+    for (let i = 0; i < this.#board.getRow(); i++) {
+      let rank = FileRankFactory.convertRowToRank(i);
+      const rankElement = document.createElement("div");
+      rankElement.classList.add("rank");
+      rankElement.classList.add("block");
+      rankElement.textContent = rank;
+      rankElement.setAttribute("row", i);
+      this.#ranks.push(rankElement);
+      ranks.appendChild(rankElement);
+    }
+
+    //create the files thing
+    const files = document.createElement("div");
+    files.classList.add("files-container");
+
+    for (let i = 0; i < this.#board.getColumn(); i++) {
+      let file = FileRankFactory.convertColToFile(i);
+      const fileElement = document.createElement("div");
+      fileElement.classList.add("file");
+      fileElement.classList.add("block");
+      fileElement.textContent = file;
+      fileElement.setAttribute("col", i);
+      this.#files.push(fileElement);
+      files.appendChild(fileElement);
+    }
+
+    this.#boardContainerElement.appendChild(ranks);
+    this.#boardContainerElement.appendChild(this.#element);
+    this.#boardContainerElement.appendChild(files);
+  }
+
+  hightLightFileRank(fileRank) {
+    const rankElement = this.#ranks.find(
+      (rank) => parseInt(rank.getAttribute("row")) === fileRank.getRow()
+    );
+    const fileElement = this.#files.find(
+      (file) => parseInt(file.getAttribute("col")) === fileRank.getCol()
+    );
+    rankElement.classList.add("highlighted");
+    fileElement.classList.add("highlighted");
+  }
+
+  unHightLightFileRank(fileRank) {
+    const rankElement = this.#ranks.find(
+      (rank) => parseInt(rank.getAttribute("row")) === fileRank.getRow()
+    );
+    const fileElement = this.#files.find(
+      (file) => parseInt(file.getAttribute("col")) === fileRank.getCol()
+    );
+    rankElement.classList.remove("highlighted");
+    fileElement.classList.remove("highlighted");
+  }
+
   flipBoard() {
     this.#flipped = !this.#flipped;
     if (this.#flipped) {
-      this.#element.classList.add("flipped");
+      this.#boardContainerElement.classList.add("flipped");
     } else {
-      this.#element.classList.remove("flipped");
+      this.#boardContainerElement.classList.remove("flipped");
     }
   }
 
@@ -166,7 +241,7 @@ export class BoardGUI {
 
     this.updateCheckStyling();
     if (data) {
-      this.flipBoard();
+      // this.flipBoard();
     }
 
     return data;
@@ -264,6 +339,7 @@ export class BoardGUI {
 
       this.displayModalIfOver();
       this.updateButtons();
+
       this.#clickedPiece = null;
     } else {
       if (!piece) return null;
@@ -572,21 +648,14 @@ export class BoardGUI {
 
       newBlock.setText(text);
       const element = newBlock.getElement();
-      element.style.position = "absolute";
-
-      if (this.isFlipped()) {
-        element.classList.add("flipped");
-      }
-
-      this.#element.append(element);
 
       const offsetFrom = {
-        col: from.col * element.offsetWidth,
-        row: from.row * element.offsetHeight,
+        col: from.col * block.getElement().offsetWidth,
+        row: from.row * block.getElement().offsetHeight,
       };
       const offsetTo = {
-        col: to.col * element.offsetWidth,
-        row: to.row * element.offsetHeight,
+        col: to.col * block.getElement().offsetWidth,
+        row: to.row * block.getElement().offsetHeight,
       };
 
       element.style.setProperty("--from-col", offsetFrom.col + "px");
@@ -594,11 +663,17 @@ export class BoardGUI {
       element.style.setProperty("--to-col", offsetTo.col + "px");
       element.style.setProperty("--to-row", offsetTo.row + "px");
 
+      element.classList.add("animation-block");
+      if (this.isFlipped()) {
+        element.classList.add("flipped");
+      }
+
+      this.#element.append(element);
+      block.setText(" ");
       this.removeValidSoptsMark();
 
       // block.fadeOutText();
 
-      block.setText(" ");
       // block.fadeOutText();
       // this.updateCheckStyling()
       block.removeCheckStyle();

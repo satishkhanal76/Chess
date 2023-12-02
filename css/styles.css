@@ -49,12 +49,24 @@ main {
   border-radius: 50%;
 }
 
-.board {
-  /* --num-of-rows: 3; */
-
-  position: relative;
+.board-container {
   --block-width: 50px;
   --block-height: 50px;
+
+  display: grid;
+  grid-template-areas:
+    "ranks board"
+    "ranks board"
+    "empty files";
+  grid-template-rows: var(--block-width) auto;
+  transition: transform 0.5s linear;
+}
+
+.board {
+  /* --num-of-rows: 3; */
+  grid-area: board;
+
+  position: relative;
 
   --num-of-columns: 8;
   font-size: 1.2rem;
@@ -63,14 +75,43 @@ main {
   grid-template-columns: repeat(var(--num-of-columns), auto);
 
   border: 2px solid black;
-  transition: transform 0.5s linear;
 }
 
-.board.flipped {
+.ranks-container {
+  grid-area: ranks;
+}
+
+.files-container {
+  grid-area: files;
+  display: flex;
+  flex-direction: row;
+}
+
+.ranks-container .rank,
+.files-container .file {
+  width: var(--block-width);
+  height: var(--block-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+.ranks-container .rank {
+  border-radius: 1rem 0 0 1rem;
+}
+.files-container .file {
+  border-radius: 0 0 1rem 1rem;
+}
+.rank.highlighted,
+.file.highlighted {
+  background-color: red;
+}
+
+.board-container.flipped {
   transform: rotateX(180deg);
 }
 
-.board.flipped .block {
+.board-container.flipped .block {
   transform: rotateX(180deg);
 }
 
@@ -179,22 +220,19 @@ main {
   color: white;
 }
 
-/* .animation-block {
-  --from-col: 0px;
-  --from-row: 0;
-
-  --to-col: 100px;
-  --to-row: 100px;
-
-  animation: animate-move 2s forwards;
-} */
-
 .block.incheck {
   color: red;
   /* background-color: rgb(241, 91, 91); */
 }
 
-.block.flipped {
+.block.animation-block {
+  --rotation: 0deg;
+  position: absolute;
+  top: var(--from-row);
+  left: var(--from-col);
+}
+
+.block.animation-block.flipped {
   --rotation: 180deg;
 }
 
@@ -222,25 +260,25 @@ main {
   0% {
     top: var(--from-row);
     left: var(--from-col);
-    transform: rotate(var(--rotation)) scale(1);
+    transform: rotate3d(1, 0, 0, var(--rotation)) scale(1);
   }
 
   20% {
     top: var(--from-row);
     left: var(--from-col);
-    transform: rotate(var(--rotation)) scale(1.5);
+    transform: rotate3d(1, 0, 0, var(--rotation)) scale(1.5);
   }
 
   80% {
     top: var(--to-row);
     left: var(--to-col);
-    transform: rotate(var(--rotation)) scale(1.5);
+    transform: rotate3d(1, 0, 0, var(--rotation)) scale(1.5);
   }
 
   100% {
     top: var(--to-row);
     left: var(--to-col);
-    transform: rotate(var(--rotation)) scale(1);
+    transform: rotate3d(1, 0, 0, var(--rotation)) scale(1);
   }
 }
 
