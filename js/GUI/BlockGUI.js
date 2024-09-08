@@ -3,28 +3,21 @@ export class BlockGUI {
 
   #element;
 
-  #boardGUI;
-
   #colour;
 
   #text;
-  #isAnimationBlock;
   #textFadeInTime = 180;
 
   static BLOCK_WIDTH = 50;
   static BLOCK_HEIGHT = 50;
 
-  constructor(fileRank, boardGUI, colour) {
+  constructor(fileRank, colour) {
     this.#fileRank = fileRank;
-
-    this.#boardGUI = boardGUI;
 
     this.#colour = colour;
     this.#text = "";
-    this.#isAnimationBlock = false;
 
     this.createElement();
-    this.addEventListeners();
   }
 
   getText() {
@@ -49,9 +42,9 @@ export class BlockGUI {
     this.setText(" ");
   }
 
-  addEventListeners() {
+  onClick(board) {
     this.#element.addEventListener("click", (eve) => {
-      this.#boardGUI.clicked(this);
+      board.clicked(this);
     });
   }
 
@@ -71,43 +64,38 @@ export class BlockGUI {
 
       fadeInElement.classList.add("fade-in-element");
 
-      fadeInElement.textContent = text;
-
       this.#element.append(fadeInElement);
 
-      fadeInElement.style.animation = `zoom-in ${
-        this.#textFadeInTime
-      }ms cubic-bezier( 0.215, 0.61, 0.355, 1 )`;
+      fadeInElement.textContent = text;
+      fadeInElement.style.animation = `zoom-in ${this.#textFadeInTime}ms`;
 
-      setTimeout(() => {
-        fadeInElement.remove();
+      fadeInElement.addEventListener("animationend", () => {
         this.setText(text);
+        fadeInElement.remove();
         resolve("ANIMATION DONE");
-      }, this.#textFadeInTime);
+      });
     });
   }
 
   async fadeOutText() {
     return new Promise((resolve, reject) => {
       const text = this.getText();
-      this.setText(" ");
 
       const fadeOutElement = document.createElement("span");
 
       fadeOutElement.classList.add("fade-in-element");
 
       fadeOutElement.textContent = text;
+      this.setText(" ");
 
       this.#element.append(fadeOutElement);
 
-      fadeOutElement.style.animation = `zoom-out ${
-        this.#textFadeInTime
-      }ms cubic-bezier( 0.215, 0.61, 0.355, 1 )`;
+      fadeOutElement.style.animation = `zoom-out ${this.#textFadeInTime}ms`;
 
-      setTimeout(() => {
+      fadeOutElement.addEventListener("animationend", () => {
         fadeOutElement.remove();
         resolve("ANIMATION DONE");
-      }, this.#textFadeInTime);
+      });
     });
   }
 
@@ -125,12 +113,5 @@ export class BlockGUI {
 
   removeCheckStyle() {
     this.#element.classList.remove("incheck");
-  }
-
-  setIsAnimationBlock(isAnimation) {
-    this.#isAnimationBlock = isAnimation;
-  }
-  getIsAnimationBlock() {
-    return this.#isAnimationBlock;
   }
 }

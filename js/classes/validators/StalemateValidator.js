@@ -1,15 +1,15 @@
 import GameValidator from "./GameValidator.js";
 
 export default class StalemateValidator extends GameValidator {
-  constructor() {
-    super(GameValidator.TYPES.DRAW_BY_STALEMATE);
+  constructor(game) {
+    super(GameValidator.TYPES.DRAW_BY_STALEMATE, game);
   }
 
-  validate(game) {
+  validate() {
     this.setIsOver(false);
 
-    const currentPlayer = game.getCurrentPlayer();
-    const board = game.getBoard();
+    const currentPlayer = this.getGame().getCurrentPlayer();
+    const board = this.getGame().getBoard();
 
     const isKingInCheck = board.isKingInCheck(currentPlayer.getColour());
 

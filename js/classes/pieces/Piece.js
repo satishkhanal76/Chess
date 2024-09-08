@@ -17,18 +17,24 @@ export class Piece {
 
   #type;
   #character;
+  #fenCharacter;
   #colour;
   #moves;
 
   #moved;
 
-  constructor(type, character, colour) {
+  constructor(type, character, colour, fenCharacter) {
     this.#type = type;
     this.#character = character;
     this.#colour = colour;
     this.#moves = [];
+    this.#fenCharacter = fenCharacter;
 
     this.#moved = false;
+  }
+
+  getFenCharacter() {
+    return this.#fenCharacter;
   }
 
   getAvailableMoves(board) {

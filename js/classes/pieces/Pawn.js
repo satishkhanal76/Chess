@@ -9,7 +9,7 @@ export class Pawn extends Piece {
   #jumpedFileRank;
 
   constructor(piece, colour) {
-    super(piece.type, piece.character, colour);
+    super(piece.type, piece.character, colour, piece.FEN);
 
     this.#promotionRow = piece.promotionRow;
     this.#jumpedFileRank = null;

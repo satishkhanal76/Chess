@@ -45,15 +45,33 @@ main {
   position: absolute;
   width: calc(var(--block-width) / 2);
   height: calc(var(--block-height) / 2);
-  background-color: rgba(255, 0, 0, 0.6);
+  background-color: rgba(7, 2, 46, 0.6);
   border-radius: 50%;
 }
 
-.board-container {
-  --block-width: 50px;
-  --block-height: 50px;
+.layout-split {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2em;
+}
+.game-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
 
+.player-display {
+  font-size: 1.5em;
+  margin-inline-start: 50px;
+}
+.player-display .pieces-taken {
+  line-height: 1.5;
+  min-height: 1.5em;
+}
+.board-container {
   display: grid;
+
   grid-template-areas:
     "ranks board"
     "ranks board"
@@ -64,6 +82,9 @@ main {
 
 .board {
   /* --num-of-rows: 3; */
+  --block-width: 50px;
+  --block-height: 50px;
+
   grid-area: board;
 
   position: relative;
@@ -104,7 +125,7 @@ main {
 }
 .rank.highlighted,
 .file.highlighted {
-  background-color: red;
+  background-color: rgb(102, 102, 102);
 }
 
 .board-container.flipped {
@@ -122,6 +143,9 @@ main {
 
   width: var(--block-width);
   height: var(--block-height);
+
+  margin: 0;
+  padding: 0;
 
   font-weight: 500;
 
@@ -150,27 +174,46 @@ main {
   position: absolute;
   top: 0;
   left: 0;
+  margin: 0;
+  padding: 0;
 
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   color: white;
 
   pointer-events: none;
 }
 
 .modal-container .modal {
+  padding: 0.5em 1em;
+  position: relative;
   background-color: black;
-  padding: 2rem;
   border-radius: 0.5rem;
 
-  font-size: 2.5rem;
   pointer-events: all;
 
   display: none;
+
+  font-size: 2.5rem;
 }
 
 .modal h5 {
   text-align: center;
+}
+
+.modal .top {
+  padding: 0.3em 0.5em;
+}
+
+.top .modal-close {
+  position: absolute;
+  top: 0.15em;
+  right: 0.15em;
+  padding: 0.3em;
+  font-size: 0.8em;
+  border-radius: 0.2em;
+  background-color: rgba(172, 185, 150, 0.521);
+  cursor: pointer;
 }
 
 .modal .display {
@@ -189,6 +232,11 @@ main {
 
 .modal .display.win .avatar {
   background-color: rgb(26, 171, 26);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   width: 15rem;
   height: 15rem;
   border-radius: 50%;
@@ -236,6 +284,26 @@ main {
   --rotation: 180deg;
 }
 
+.promotion-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 50%;
+  transform: translate(50%, 50%);
+
+  background-color: #000000;
+  color: white;
+  display: grid;
+  grid-template-columns: repeat(2, 50%);
+  justify-items: center;
+  align-items: center;
+}
+.promotion-modal-item {
+  font-size: 6rem;
+  cursor: pointer;
+}
+
 @media only screen and (max-width: 600px) {
   .board {
     --block-width: 45px;
@@ -250,7 +318,15 @@ main {
   }
 }
 
-@media only screen and (max-width: 350px) {
+@media only screen and (max-width: 400px) {
+  .ranks-container,
+  .files-container {
+    display: none;
+  }
+
+  .player-display {
+    margin-inline-start: 0;
+  }
   .modal .display.stalemate {
     font-size: 2em;
   }

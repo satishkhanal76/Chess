@@ -4,7 +4,7 @@ import { Piece } from "./Piece.js";
 
 export class Rook extends Piece {
   constructor(piece, colour) {
-    super(piece.type, piece.character, colour);
+    super(piece.type, piece.character, colour, piece.FEN);
     this.configureMoves();
   }
 

@@ -51,6 +51,32 @@ export class Board {
     }
   }
 
+  getPositionAsString() {
+    let string = new String("");
+    for (let i = 0; i < this.#grid.length; i++) {
+      let emptySpaces = 0;
+      for (let j = 0; j < this.#grid[i].length; j++) {
+        if (this.#grid[j][i]) {
+          if (emptySpaces > 1) {
+            string = string.concat(emptySpaces);
+            emptySpaces = 0;
+          }
+          string = string.concat(this.#grid[j][i].getFenCharacter());
+        } else {
+          emptySpaces = emptySpaces + 1;
+        }
+      }
+      if (emptySpaces > 1) {
+        string = string.concat(emptySpaces);
+        emptySpaces = 0;
+      }
+      if (i < this.#grid.length - 1) {
+        string = string.concat("/");
+      }
+    }
+    return string;
+  }
+
   /**
    * Returns all the pieces on the board
    * @returns pieces

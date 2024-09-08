@@ -8,37 +8,43 @@ import ClassicalSet from "./board-sets/ClassicalSet.js";
 import ClassicalVariant from "./variants/ClassicalVariant.js";
 import TwoQueenVariant from "./variants/TwoQueenVariant.js";
 import FileRankFactory from "./FileRankFactory.js";
+import DeadPositionValidator from "./validators/DeadPositionValidator.js";
+import TurnHandler from "./utilities/TurnHandler.js";
+import ThreeFoldRepitionValidator from "./validators/ThreeFoldRepitionValidator.js";
 
 export class Game {
   #variant;
 
   #board;
 
-  #players = [];
-  #currentPlayer;
-  #currentPlayerIndex;
-
   #isOver = false;
 
   #winner;
 
   #validators = [];
+  #isInProgress;
+
+  #turnHandler;
 
   constructor(variant) {
     this.#variant = variant || new ClassicalVariant();
+    this.#turnHandler = new TurnHandler();
 
     this.createBoard();
 
     this.createPlayers();
-    this.changeTurn();
 
     this.resetGame();
 
     this.addValidators();
 
     this.#board.getMoveEventListener().addListener((event) => {
-      this.changeTurn();
+      this.#isInProgress = true;
+
+      this.#validators.forEach((v) => v.onPieceMove(event.command));
+
       this.validateGame();
+      this.#turnHandler.nextTurn();
 
       const command = event.command;
 
@@ -53,8 +59,10 @@ export class Game {
   }
 
   addValidators() {
-    this.#validators.push(new CheckmateValidator());
-    this.#validators.push(new StalemateValidator());
+    this.#validators.push(new CheckmateValidator(this));
+    this.#validators.push(new StalemateValidator(this));
+    this.#validators.push(new DeadPositionValidator(this));
+    this.#validators.push(new ThreeFoldRepitionValidator(this));
   }
 
   validateGame() {
@@ -63,20 +71,27 @@ export class Game {
       validator.validate(this);
 
       const isGameOver = validator.getIsOver();
+
       if (!isGameOver) continue;
 
       this.#isOver = true;
+
       const type = validator.getType();
 
       if (type === GameValidator.TYPES.CHECKMATE) {
-        this.#winner = this.getPreviousPlayer();
+        this.#winner = validator.getWinner();
       }
+
+      console.log(this, validator);
+
+      this.#isInProgress = false;
     }
   }
 
   resetGame() {
     this.#isOver = false;
     this.#winner = null;
+    this.#isInProgress = false;
   }
 
   createBoard() {
@@ -84,54 +99,20 @@ export class Game {
   }
 
   getPlayer(colour) {
-    return this.#players.find((player) => player.getColour() === colour);
+    return this.#turnHandler.getPlayer(colour);
   }
 
   getPlayers() {
-    return this.#players;
+    return this.#turnHandler.getPlayers();
   }
 
   createPlayers() {
-    this.#players.push(new Player(this.#board, Piece.COLOUR.WHITE));
-    this.#players.push(new Player(this.#board, Piece.COLOUR.BLACK));
-  }
-
-  changeTurn() {
-    if (isNaN(this.#currentPlayerIndex)) {
-      this.#currentPlayerIndex = 0;
-    } else {
-      this.#currentPlayerIndex += 1;
-    }
-    if (this.#currentPlayerIndex >= this.#players.length)
-      this.#currentPlayerIndex = 0;
-    this.#currentPlayer = this.#players[this.#currentPlayerIndex];
-  }
-
-  checkForOver() {
-    this.#checkForStalemate();
-  }
-
-  #checkForStalemate() {
-    const staleMate = this.#players.find((player) => player.isInStaleMate());
-    if (!staleMate) return;
-    this.#isOver = true;
-    this.#winner = null;
+    this.#turnHandler.addPlayer(new Player(this.#board, Piece.COLOUR.WHITE));
+    this.#turnHandler.addPlayer(new Player(this.#board, Piece.COLOUR.BLACK));
   }
 
   getCurrentPlayer() {
-    return this.#currentPlayer;
-  }
-
-  getNextPlayer() {
-    let nextTurnIndex = this.#currentPlayerIndex + 1;
-    if (nextTurnIndex >= this.#players.length) nextTurnIndex = 0;
-    return this.#players[nextTurnIndex];
-  }
-
-  getPreviousPlayer() {
-    let previousTurnIndex = this.#currentPlayerIndex - 1;
-    if (previousTurnIndex < 0) previousTurnIndex = 0;
-    return this.#players[previousTurnIndex];
+    return this.#turnHandler.getCurrentPlayer();
   }
 
   getBoard() {
@@ -143,7 +124,10 @@ export class Game {
   }
 
   isOver() {
-    this.checkForOver();
     return this.#isOver;
+  }
+
+  getIsInProgress() {
+    return this.#isInProgress;
   }
 }

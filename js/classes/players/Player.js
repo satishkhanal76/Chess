@@ -217,4 +217,8 @@ export class Player {
   getColour() {
     return this.#color;
   }
+
+  getTakenPieces() {
+    return this.#takenPieces;
+  }
 }

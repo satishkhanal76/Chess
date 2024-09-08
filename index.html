@@ -12,16 +12,31 @@
   <body>
     <main>
       <h1>Chess</h1>
-      <div id="board-container" class="board-container"></div>
-      <div class="buttons">
-        <button id="previous">prev</button>
-        <button id="next">next</button>
-        <button id="current">current</button>
+      <div class="layout-split">
+        <div class="game-container">
+          <div class="player-display top">
+            <div class="name">Black</div>
+            <div class="pieces-taken"></div>
+          </div>
+          <div id="board-container" class="board-container"></div>
+          <div class="player-display bottom">
+            <div class="name">White</div>
+            <div class="pieces-taken"></div>
+          </div>
+        </div>
+        <div class="buttons">
+          <button id="previous">prev</button>
+          <button id="next">next</button>
+          <button id="current">current</button>
+        </div>
       </div>
     </main>
     <div class="modal-container">
       <div id="modal" class="modal">
-        <h5 class="modal-title">Stalemate!</h5>
+        <div class="top">
+          <h5 class="modal-title">Stalemate!</h5>
+          <span id="modal-close" class="modal-close">X</span>
+        </div>
         <div class="display"></div>
       </div>
     </div>
