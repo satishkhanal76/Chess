@@ -486,7 +486,6 @@ export class BoardGUI {
   }
 
   updateBoard() {
-    console.log("Updating board");
     this.#element.style.setProperty(
       "--num-of-columns",
       this.#board.getColumn()

@@ -44,7 +44,6 @@ export default class Animation {
     const fromElement = this.#fromBlock.getElement();
     const toElement = this.#toBlock.getElement();
 
-    console.dir(fromElement);
 
     const offsetFrom = {
       col: fromFileRank.getCol() * fromElement.offsetWidth,

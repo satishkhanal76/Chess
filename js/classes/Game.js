@@ -32,7 +32,6 @@ export class Game {
 
     this.createBoard();
 
-    this.createPlayers();
 
     this.resetGame();
 
@@ -106,10 +105,10 @@ export class Game {
     return this.#turnHandler.getPlayers();
   }
 
-  createPlayers() {
-    this.#turnHandler.addPlayer(new Player(this.#board, Piece.COLOUR.WHITE));
-    this.#turnHandler.addPlayer(new Player(this.#board, Piece.COLOUR.BLACK));
+  addPlayer(player) {
+    this.#turnHandler.addPlayer(player)
   }
+
 
   getCurrentPlayer() {
     return this.#turnHandler.getCurrentPlayer();
@@ -129,5 +128,9 @@ export class Game {
 
   getIsInProgress() {
     return this.#isInProgress;
+  }
+
+  getTurnHandler() {
+    return this.#turnHandler;
   }
 }
