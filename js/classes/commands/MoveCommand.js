@@ -40,16 +40,18 @@ export class MoveCommand extends Command {
     this.#movingPiece.moved(this.#from, this.#to);
     this.emit();
 
-    return (this.setIsValid(true));
+    this.setIsValid(true);
   }
 
   undo() {
+    super.undo();
     this.#board.movePiece(this.#movingPiece, this.#from);
 
     this.#board.placePiece(this.#takingPiece, this.#to);
   }
 
   redo() {
+    super.redo();
     this.#board.movePiece(this.#movingPiece, this.#to);
   }
 

@@ -31,10 +31,10 @@ export class CastleCommand extends Command {
     this.#rook = this.#board.getPiece(this.#rookPosition);
 
     const isAValidRook = this.rooksThatCanLegallyCastle().find(r => r === this.#rook);
-    if(!isAValidRook) return false;
+    if(!isAValidRook) return (this.isValid(false));
 
     let pathToKing = this.#rook.pathToKing(this.#board);
-    if(!pathToKing) return false;
+    if(!pathToKing) return (this.isValid(false));
 
     let kingNewIndex = pathToKing.length - 2;
     let rookNewIndex = kingNewIndex + 1;
@@ -58,8 +58,6 @@ export class CastleCommand extends Command {
     this.emit();
 
     this.setIsValid(true);
-
-    return true;
   }
 
   /**
@@ -99,11 +97,13 @@ export class CastleCommand extends Command {
   }
 
   undo() {
+    super.undo();
     this.#board.movePiece(this.#king, this.#kingPosition);
     this.#board.movePiece(this.#rook, this.#rookPosition);
   }
 
   redo() {
+    super.redo();
     this.#board.movePiece(this.#king, this.#kingNewPosition);
     this.#board.movePiece(this.#rook, this.#rookNewPosition);
   }

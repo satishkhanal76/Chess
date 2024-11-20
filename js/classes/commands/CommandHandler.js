@@ -90,9 +90,9 @@ export class CommandHandler {
       return null;
     }
 
-    const commandSuccess = command.execute();
+    command.execute();
 
-    if (!commandSuccess) {
+    if (!command.isValid()) {
       this.removeCommand(command);
       this.#decrementCurrentCommandIndex();
     }

@@ -20,8 +20,13 @@ export class Command {
     console.error("Not Implemented!");
   }
 
-  undo(board) {
-    console.error("Not Implemented!");
+  undo() {
+    if(!(this.isExecuted() && this.isValid())) throw new Error("Can't undo an unexecuted or invalid command!");
+  }
+
+  redo() {
+    if(!(this.isExecuted() && this.isValid())) throw new Error("Can't redo an unexecuted or invalid command!");
+
   }
 
   getType() {

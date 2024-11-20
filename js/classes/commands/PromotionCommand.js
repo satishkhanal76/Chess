@@ -50,10 +50,11 @@ export class PromotionCommand extends Command {
 
     this.emit();
 
-    return (this.setIsValid(true));
+    this.setIsValid(true);
   }
 
   undo() {
+    super.undo();
     this.#board.removePiece(this.#to);
     this.#board.removePiece(this.#from);
 
@@ -62,6 +63,7 @@ export class PromotionCommand extends Command {
   }
 
   redo() {
+    super.redo();
     //remove pieces from their place
     this.#board.removePiece(this.#from);
     this.#board.removePiece(this.#to);
