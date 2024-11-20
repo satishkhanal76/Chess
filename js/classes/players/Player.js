@@ -18,7 +18,7 @@ export class Player {
 
     this.getPieces();
   }
-
+  
   getValidMoves(piece) {
     if (piece.getColour() !== this.getColour()) return [];
 

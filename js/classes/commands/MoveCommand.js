@@ -6,8 +6,6 @@ export class MoveCommand extends Command {
   #from;
   #to;
 
-  #isValidCommand;
-
   //keeps track of the piece that this move captures if any
   #movingPiece;
   #takingPiece;
@@ -22,7 +20,6 @@ export class MoveCommand extends Command {
     this.#movingPiece = null;
     this.#takingPiece = null;
 
-    this.#isValidCommand = true;
   }
 
   execute() {
@@ -32,18 +29,18 @@ export class MoveCommand extends Command {
     this.#takingPiece = this.#board.getPiece(this.#to);
 
     if (!this.#movingPiece) {
-      return (this.#isValidCommand = false);
+      return (this.setIsValid(false));
     }
 
     if (!this.#board.isValidMove(this.#from, this.#to)) {
-      return (this.#isValidCommand = false);
+      return (this.setIsValid(false));
     }
 
     this.#board.movePiece(this.#movingPiece, this.#to);
     this.#movingPiece.moved(this.#from, this.#to);
     this.emit();
 
-    return (this.#isValidCommand = true);
+    return (this.setIsValid(true));
   }
 
   undo() {
@@ -74,9 +71,6 @@ export class MoveCommand extends Command {
     return this.#takingPiece;
   }
 
-  isAValidCommand() {
-    return this.#isValidCommand;
-  }
 
   getMovingPiece() {
     return this.#movingPiece;

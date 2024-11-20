@@ -1,13 +1,8 @@
-import { Board } from "./Board.js";
 import { Piece } from "./pieces/Piece.js";
-import { Player } from "./players/Player.js";
 import GameValidator from "./validators/GameValidator.js";
 import CheckmateValidator from "./validators/CheckmateValidator.js";
 import StalemateValidator from "./validators/StalemateValidator.js";
-import ClassicalSet from "./board-sets/ClassicalSet.js";
 import ClassicalVariant from "./variants/ClassicalVariant.js";
-import TwoQueenVariant from "./variants/TwoQueenVariant.js";
-import FileRankFactory from "./FileRankFactory.js";
 import DeadPositionValidator from "./validators/DeadPositionValidator.js";
 import TurnHandler from "./utilities/TurnHandler.js";
 import ThreeFoldRepitionValidator from "./validators/ThreeFoldRepitionValidator.js";
@@ -64,6 +59,7 @@ export class Game {
     });
   }
 
+  //TODO: variants should handle adding validators
   addValidators() {
     this.#validators.push(new CheckmateValidator(this));
     this.#validators.push(new StalemateValidator(this));
@@ -128,7 +124,7 @@ export class Game {
     //execute the command
     command.execute();
 
-    if(command.isAValidCommand()) {
+    if(command.isValid()) {
       this.#board.getCommandHandler().addCommand(command);
     }
 

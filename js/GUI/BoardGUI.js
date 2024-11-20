@@ -29,8 +29,6 @@ export class BoardGUI {
 
   #boardContainerElement;
 
-  #topDisplayElement;
-  #bottomDisplayeElement;
 
   constructor(game, modal) {
     this.#flipped = false;
@@ -51,7 +49,6 @@ export class BoardGUI {
   createBoard() {
     this.#boardContainerElement = document.getElementById("board-container");
 
-    this.setupDisplay();
     //create the board
     this.#element = document.createElement("div");
     this.#element.classList.add("board");
@@ -101,28 +98,6 @@ export class BoardGUI {
     this.#boardContainerElement.appendChild(files);
   }
 
-  setupDisplay() {
-    if (this.#flipped) {
-      this.#topDisplayElement = document.querySelector(".player-display.top");
-      this.#bottomDisplayeElement = document.querySelector(
-        ".player-display.bottom"
-      );
-    } else {
-      this.#bottomDisplayeElement = document.querySelector(
-        ".player-display.top"
-      );
-      this.#topDisplayElement = document.querySelector(
-        ".player-display.bottom"
-      );
-    }
-
-    this.#topDisplayElement.querySelector(".name").innerText =
-      Piece.COLOUR.WHITE;
-    this.#bottomDisplayeElement.querySelector(".name").innerText =
-      Piece.COLOUR.BLACK;
-
-    this.updateTakenPieces();
-  }
 
   hightLightFileRank(fileRank) {
     const rankElement = this.#ranks.find(
@@ -245,7 +220,7 @@ export class BoardGUI {
       this.#clickedPiece = null;
       this.removeValidSoptsMark();
 
-      if (command && !command.isAValidCommand()) return;
+      if (command && !command.isValid()) return;
       const animation = await this.#animationHandler.animateCommand(command);
       // this.flipBoard();
 
@@ -265,38 +240,9 @@ export class BoardGUI {
     }
 
     this.updateCheckStyling();
-    this.updateTakenPieces();
   }
 
-  updateTakenPieces() {
-    const topTakenPiecesElement =
-      this.#topDisplayElement.querySelector(".pieces-taken");
-    const bottomTakenPiecesElement =
-      this.#bottomDisplayeElement.querySelector(".pieces-taken");
-
-    topTakenPiecesElement.innerHTML = "";
-    bottomTakenPiecesElement.innerHTML = "";
-
-    topTakenPiecesElement.appendChild(
-      document.createTextNode(
-        this.#game
-          .getPlayer(Piece.COLOUR.WHITE)
-          .getTakenPieces()
-          .map((piece) => piece.getCharacter())
-          .join(" ")
-      )
-    );
-
-    bottomTakenPiecesElement.appendChild(
-      document.createTextNode(
-        this.#game
-          .getPlayer(Piece.COLOUR.BLACK)
-          .getTakenPieces()
-          .map((piece) => piece.getCharacter())
-          .join(" ")
-      )
-    );
-  }
+  
 
   async executeAllCommands() {
     const commandHandler = this.#board.getCommandHandler();

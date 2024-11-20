@@ -8,10 +8,12 @@ export class Command {
 
   #executed;
   #type;
+  #isValid;
 
   constructor(type) {
     this.#type = type;
     this.#executed = false;
+    this.#isValid = false;
   }
 
   execute() {
@@ -36,5 +38,13 @@ export class Command {
 
   setExecuted(executed) {
     this.#executed = executed;
+  }
+
+  isValid() {
+    return this.#isValid;
+  }
+
+  setIsValid(isValid) {
+    this.#isValid = isValid;
   }
 }

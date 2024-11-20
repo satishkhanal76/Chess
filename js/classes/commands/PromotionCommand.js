@@ -6,7 +6,6 @@ export class PromotionCommand extends Command {
   #from;
   #to;
 
-  #isValidCommand;
 
   //keeps track of the piece that this move captures if any
   #movingPiece;
@@ -24,7 +23,6 @@ export class PromotionCommand extends Command {
     this.#takingPiece = null;
     this.#promotionPiece = promotionPiece;
 
-    this.#isValidCommand = true;
   }
 
   execute() {
@@ -34,11 +32,11 @@ export class PromotionCommand extends Command {
     this.#takingPiece = this.#board.getPiece(this.#to);
 
     if (!this.#movingPiece) {
-      return (this.#isValidCommand = false);
+      return (this.setIsValid(false));
     }
 
     if (!this.#board.isValidMove(this.#from, this.#to)) {
-      return (this.#isValidCommand = false);
+      return (this.setIsValid(false));
     }
 
     //remove pieces from their place
@@ -52,7 +50,7 @@ export class PromotionCommand extends Command {
 
     this.emit();
 
-    return (this.#isValidCommand = true);
+    return (this.setIsValid(true));
   }
 
   undo() {
@@ -98,7 +96,4 @@ export class PromotionCommand extends Command {
     return this.#promotionPiece;
   }
 
-  isAValidCommand() {
-    return this.#isValidCommand;
-  }
 }

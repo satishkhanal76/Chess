@@ -13,8 +13,6 @@ export class CastleCommand extends Command {
   #king;
   #rook;
 
-  #isvalidCommand;
-
   constructor(board, kingPosition, rookPosition) {
     super(Command.TYPES.CASTLE_COMMAND);
 
@@ -59,7 +57,7 @@ export class CastleCommand extends Command {
 
     this.emit();
 
-    this.#isvalidCommand = true;
+    this.setIsValid(true);
 
     return true;
   }
@@ -140,9 +138,6 @@ export class CastleCommand extends Command {
     return this.#rook;
   }
 
-  isAValidCommand() {
-    return this.#isvalidCommand;
-  }
 
   getMovingPiece() {
     return this.#king;
