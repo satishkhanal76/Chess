@@ -1,4 +1,5 @@
 import FileRankFactory from "../FileRankFactory.js";
+import { Piece } from "../pieces/Piece.js";
 import { Command } from "./Command.js";
 
 export class CastleCommand extends Command {
@@ -31,7 +32,11 @@ export class CastleCommand extends Command {
     this.#king = this.#board.getPiece(this.#kingPosition);
     this.#rook = this.#board.getPiece(this.#rookPosition);
 
+    const isAValidRook = this.rooksThatCanLegallyCastle().find(r => r === this.#rook);
+    if(!isAValidRook) return false;
+
     let pathToKing = this.#rook.pathToKing(this.#board);
+    if(!pathToKing) return false;
 
     let kingNewIndex = pathToKing.length - 2;
     let rookNewIndex = kingNewIndex + 1;
@@ -57,6 +62,42 @@ export class CastleCommand extends Command {
     this.#isvalidCommand = true;
 
     return true;
+  }
+
+  /**
+   * Finds and returns all rooks that can be castled with the king
+   */
+  rooksThatCanLegallyCastle() {
+
+    //if the king has moved or is in check(no legal castles)
+    if (this.#king.hasMoved() || this.#board.isPieceUnderAttack(this.#king)) return [];
+
+    let rooks = this.#board.getPiecesByTypeAndColour(Piece.TYPE.ROOK, this.#king.getColour());
+    let legalRooks = [];
+
+    for (let i = 0; i < rooks.length; i++) {
+      const rook = rooks[i];
+      if (rook.hasMoved()) continue;
+
+      const pathToKing = rook.pathToKing(this.#board);
+      if (!pathToKing) continue;
+
+      let spotsUnderAttackByEnemy = this.#board.getSpotsUnderAttack(this.#king.getColour());
+
+      let spotUnderAttack = false;
+      pathToKing.forEach((spot) => {
+        let onSpot = spotsUnderAttackByEnemy.filter(
+          (move) => spot.col == move.col && spot.row == move.row
+        );
+        if (onSpot.length >= 1) {
+          spotUnderAttack = true;
+        }
+      });
+      if (spotUnderAttack) continue;
+
+      legalRooks.push(rook);
+    }
+    return legalRooks;
   }
 
   undo() {
@@ -101,5 +142,9 @@ export class CastleCommand extends Command {
 
   isAValidCommand() {
     return this.#isvalidCommand;
+  }
+
+  getMovingPiece() {
+    return this.#king;
   }
 }

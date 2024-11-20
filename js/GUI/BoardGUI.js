@@ -5,6 +5,8 @@ import { Command } from "../classes/commands/Command.js";
 import MoveAnimation from "./animations/MoveAnimation.js";
 import AnimationHandler from "./animations/AnimationHandler.js";
 import PromotionModal from "./PromotionModal.js";
+import { MoveCommand } from "../classes/commands/MoveCommand.js";
+import Move from "../classes/Move.js";
 
 export class BoardGUI {
   #game;
@@ -218,8 +220,9 @@ export class BoardGUI {
     let piece = this.#board.getPiece(block.getFileRank());
 
     if (this.#clickedPiece) {
-      let fromPiece = this.#board.getPiece(this.#clickedPiece.getFileRank());
-      let toPiece = this.#board.getPiece(block.getFileRank());
+
+      const move = new Move(this.#clickedPiece.getFileRank(), block.getFileRank());
+      const commandType = this.#game.getCommandType(move);
 
       if (
         this.#board.getCommandHandler().getCurrentCommandIndex() <
@@ -228,34 +231,17 @@ export class BoardGUI {
         await this.executeAllCommands();
       }
 
-      let command;
 
-      if (
-        fromPiece?.getColour() === toPiece?.getColour() &&
-        fromPiece?.getType() === Piece.TYPE.KING &&
-        toPiece?.getType() === Piece.TYPE.ROOK
-      ) {
-        command = currentPlayer.castle(
-          this.#clickedPiece.getFileRank(),
-          block.getFileRank()
-        );
-      } else if (
-        fromPiece.getType() === Piece.TYPE.PAWN &&
-        fromPiece.getPromotionRow() === block.getFileRank().getRow()
-      ) {
+
+      if(commandType === Command.TYPES.PROMOTION_COMMAND) {
         const pomotionModal = new PromotionModal(currentPlayer.getColour());
         const promotionPieceType = await pomotionModal.askForPromotionPiece();
-        command = currentPlayer.promotePiece(
-          this.#board.getPiece(this.#clickedPiece.getFileRank()),
-          block.getFileRank(),
-          promotionPieceType
-        );
-      } else {
-        command = currentPlayer.movePiece(
-          this.#board.getPiece(this.#clickedPiece.getFileRank()),
-          block.getFileRank()
-        );
+        console.log(promotionPieceType)
+        move.setPromotionPieceType(promotionPieceType);
       }
+
+      const command = this.#game.movePiece(this.#game.getCurrentPlayer(), move);
+
       this.#clickedPiece = null;
       this.removeValidSoptsMark();
 

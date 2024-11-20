@@ -290,6 +290,10 @@ export class Board {
     return this.getAllPieces().filter((piece) => piece.getType() === type);
   }
 
+  getPiecesByTypeAndColour(type, colour) {
+    return Board.filterColouredPieces(this.getPiecesByType(type), colour);
+  }
+
   /**
    * Gets a piece from a location on the board
    * @param {FileRank} at the location to get the pice from
@@ -314,88 +318,6 @@ export class Board {
     return null;
   }
 
-  findPinAndChecks(colour) {
-    const pinnedPieces = [];
-    let isKingChecked = false;
-    const king = Board.filterColouredPieces(
-      this.getPiecesByType(Piece.TYPE.KING),
-      colour
-    ).pop();
-    const kingPosition = this.getPiecePosition(king);
-
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
-        //for each direction
-        const position = {
-          col: kingPosition.getCol() + i,
-          row: kingPosition.getRow() + j,
-        };
-        let possiblyPinnedPiece = null;
-        while (
-          position.col < this.#col - 1 &&
-          position.col >= 0 &&
-          position.row < this.#row - 1 &&
-          position.row >= 0
-        ) {
-          const piece = this.getPiece(
-            FileRankFactory.getFileRank(position.col, position.row)
-          );
-
-          // this piece might be pinned
-          if (piece && piece.getColour() === colour) {
-            if (!possiblyPinnedPiece) {
-              possiblyPinnedPiece = piece;
-            } else {
-              break;
-            }
-          } else if (piece && piece.getColour() !== colour) {
-            const enemyPieceMoves = this.getValidMoves(piece);
-            enemyPieceMoves.forEach((enemyPieceMove) => {
-              const pieceAtEnemyMove = this.getPiece(
-                FileRankFactory.getFileRank(
-                  enemyPieceMove.col,
-                  enemyPieceMove.row
-                )
-              );
-              if (pieceAtEnemyMove && pieceAtEnemyMove === king) {
-                isKingChecked = true;
-              } else if (
-                pieceAtEnemyMove &&
-                pieceAtEnemyMove === possiblyPinnedPiece
-              ) {
-                pinnedPieces.push(possiblyPinnedPiece);
-              }
-            });
-            break;
-          }
-
-          position.col += i;
-          position.row += j;
-        }
-      }
-    }
-
-    const enemyKnights = Board.filterOutColouredPieces(
-      this.getPiecesByType(Piece.TYPE.KNIGHT),
-      colour
-    );
-
-    enemyKnights.find((enemyKnight) => {
-      const enemyKnightMoves = this.getValidMoves(enemyKnight);
-      const foundKing = enemyKnightMoves.find(
-        (move) =>
-          move.col === kingPosition.getCol() &&
-          move.row === kingPosition.getRow()
-      );
-
-      if (foundKing) {
-        isKingChecked = true;
-      }
-    });
-
-    console.log("Pinned Pieces: ", pinnedPieces);
-    console.log("King Checked: ", isKingChecked);
-  }
 
   /**
    * Checks to see if this piece is under attacked by enemy pieces
@@ -454,6 +376,20 @@ export class Board {
    */
   static filterColouredPieces(pieces, colour) {
     return pieces.filter((piece) => piece.getColour() === colour);
+  }
+
+  getSpotsUnderAttack(colour) {
+    const allEnemyPieces = Board.filterOutColouredPieces(this.getAllPieces(), colour);
+
+    let spotsUnderAttack = [];
+
+    allEnemyPieces.forEach((piece) => {
+      spotsUnderAttack = spotsUnderAttack.concat(
+        this.getValidMoves(piece)
+      );
+    });
+
+    return spotsUnderAttack;
   }
 
   getCommandHandler() {

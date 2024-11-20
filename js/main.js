@@ -6,7 +6,6 @@ import { BoardGUI } from "./GUI/BoardGUI.js";
 
 const SERVER_URL = "http://localhost:3000";
 
-let GAME_VARIANT = "CLASSICAL";
 
 let game = new Game();
 let boardGUI;
@@ -88,7 +87,7 @@ const socket = io(SERVER_URL, {
 });
 
 // Attempt to connect
-socket.connect();
+// socket.connect();
 
 
 
