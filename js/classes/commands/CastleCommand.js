@@ -1,6 +1,7 @@
 import FileRankFactory from "../FileRankFactory.js";
 import { Piece } from "../pieces/Piece.js";
 import { Command } from "./Command.js";
+import PieceAffect from "./PieceAffect.js";
 
 export class CastleCommand extends Command {
   #board;
@@ -20,21 +21,29 @@ export class CastleCommand extends Command {
     this.#kingPosition = kingPosition;
     this.#rookPosition = rookPosition;
 
-    this.#kingNewPosition = null;
-    this.#rookNewPosition = null;
-  }
-
-  execute() {
-    this.setExecuted(true);
-
     this.#king = this.#board.getPiece(this.#kingPosition);
     this.#rook = this.#board.getPiece(this.#rookPosition);
 
-    const isAValidRook = this.rooksThatCanLegallyCastle().find(r => r === this.#rook);
-    if(!isAValidRook) return (this.isValid(false));
+    this.#kingNewPosition = null;
+    this.#rookNewPosition = null;
 
-    let pathToKing = this.#rook.pathToKing(this.#board);
-    if(!pathToKing) return (this.isValid(false));
+    this.validate();
+
+  }
+
+  validate() {
+    if(!this.#king || !this.#rook) {
+      this.setIsValid(false);
+      throw new Error("No king or rook provided");
+    }
+    const isAValidRook = this.rooksThatCanLegallyCastle().find(r => r === this.#rook);
+    if(!isAValidRook) {
+      this.setIsValid(false);
+      throw new Error("Can't castle to this rook!")
+    };
+
+
+    const pathToKing = this.#rook.pathToKing(this.#board);
 
     let kingNewIndex = pathToKing.length - 2;
     let rookNewIndex = kingNewIndex + 1;
@@ -49,15 +58,24 @@ export class CastleCommand extends Command {
       pathToKing[rookNewIndex].row
     );
 
+    this.setIsValid(true);
+
+  }
+
+  execute() {
+    super.execute();
+    
     this.#board.movePiece(this.#king, this.#kingNewPosition);
     this.#board.movePiece(this.#rook, this.#rookNewPosition);
-
+    
     this.#king.moved(this.#kingPosition, this.#kingNewPosition);
     this.#king.moved(this.#rookPosition, this.#rookNewPosition);
-
-    this.emit();
-
-    this.setIsValid(true);
+    
+    this.getPiecesAffected().push(new PieceAffect(this.#king, PieceAffect.AFFECT_TYPES.MOVE, this.#kingPosition, this.#kingNewPosition));
+    this.getPiecesAffected().push(new PieceAffect(this.#rook, PieceAffect.AFFECT_TYPES.MOVE, this.#rookPosition, this.#rookNewPosition));
+    
+    
+    this.setExecuted(true);
   }
 
   /**
@@ -106,12 +124,6 @@ export class CastleCommand extends Command {
     super.redo();
     this.#board.movePiece(this.#king, this.#kingNewPosition);
     this.#board.movePiece(this.#rook, this.#rookNewPosition);
-  }
-
-  emit() {
-    this.#board.getMoveEventListener().emit({
-      command: this,
-    });
   }
 
   getKingPosition() {

@@ -43,6 +43,7 @@ export default class FileRank {
     return this.#file.concat(this.#rank);
   }
 
+  
   toString() {
     return this.getFileRank();
   }

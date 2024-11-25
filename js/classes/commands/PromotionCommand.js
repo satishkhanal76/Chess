@@ -1,4 +1,5 @@
 import { Command } from "./Command.js";
+import PieceAffect from "./PieceAffect.js";
 
 export class PromotionCommand extends Command {
   #board;
@@ -19,25 +20,32 @@ export class PromotionCommand extends Command {
     this.#from = from;
     this.#to = to;
 
-    this.#movingPiece = null;
-    this.#takingPiece = null;
+    this.#movingPiece = this.#board.getPiece(this.#from);
+    this.#takingPiece = this.#board.getPiece(this.#to);
+
     this.#promotionPiece = promotionPiece;
+
+    this.validate();
+  }
+
+
+  validate() {
+    if(!this.#movingPiece) {
+      this.setIsValid(false);
+      throw new Error(`No piece found at ${this.#from}`);
+    }
+
+    if (!this.#board.isValidMove(this.#from, this.#to)) {
+      this.setIsValid(false);
+      throw new Error ("Not a valid move!");
+    }
+
+    this.setIsValid(true);
 
   }
 
   execute() {
-    this.setExecuted(true);
-
-    this.#movingPiece = this.#board.getPiece(this.#from);
-    this.#takingPiece = this.#board.getPiece(this.#to);
-
-    if (!this.#movingPiece) {
-      return (this.setIsValid(false));
-    }
-
-    if (!this.#board.isValidMove(this.#from, this.#to)) {
-      return (this.setIsValid(false));
-    }
+    super.execute();
 
     //remove pieces from their place
     this.#board.removePiece(this.#from);
@@ -48,9 +56,14 @@ export class PromotionCommand extends Command {
 
     this.#movingPiece.moved(this.#from, this.#to);
 
-    this.emit();
+    this.getPiecesAffected().push(new PieceAffect(this.#movingPiece, PieceAffect.AFFECT_TYPES.MOVE, this.#from, this.#to));
+    if(this.#takingPiece)
+    this.getPiecesAffected().push(new PieceAffect(this.#takingPiece, PieceAffect.AFFECT_TYPES.CAPTURE, this.#to, null, this.#movingPiece));
+    this.getPiecesAffected().push(new PieceAffect(this.#movingPiece, PieceAffect.AFFECT_TYPES.REMOVE, this.#to, null, this.#movingPiece));
+    this.getPiecesAffected().push(new PieceAffect(this.#promotionPiece, PieceAffect.AFFECT_TYPES.ADD, null, this.#to, this.#movingPiece));
 
-    this.setIsValid(true);
+
+    this.setExecuted(true);
   }
 
   undo() {
@@ -72,11 +85,6 @@ export class PromotionCommand extends Command {
     this.#board.placePiece(this.#promotionPiece, this.#to);
   }
 
-  emit() {
-    this.#board.getMoveEventListener().emit({
-      command: this,
-    });
-  }
 
   getFrom() {
     return this.#from;

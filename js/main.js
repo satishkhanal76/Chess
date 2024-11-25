@@ -14,6 +14,10 @@ const modal = document.getElementById("modal");
 modal.style.display = "none";
 
 
+game.moveEventListeners.addListener((payload) => {
+  console.log(payload)
+})
+
 
 // Handle the game type choosing
 const topSection = document.getElementById("top-section");

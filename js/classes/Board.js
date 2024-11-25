@@ -16,7 +16,6 @@ export class Board {
 
   #commandHandler;
 
-  #moveEventListener;
 
   #moveValidator;
 
@@ -24,7 +23,6 @@ export class Board {
     this.#createBoard(col, row);
 
     this.#commandHandler = new CommandHandler();
-    this.#moveEventListener = new Listeners();
     this.#moveValidator = new MoveValidator(this);
   }
 
@@ -237,7 +235,7 @@ export class Board {
   }
 
   /**
-   * Checks to see if this move is valid
+   * Checks to see if this move is valid. does not alter the state of the board
    * @param {*} from the location to move the piece from
    * @param {*} to the location to move the piece to
    * @returns if the move is a valid move
@@ -247,9 +245,7 @@ export class Board {
 
     let isAvalidPosition = false;
 
-    // console.log(this.#commandHandler.getCurrentCommand());
-
-    let validMoves = this.getValidMoves(fromPiece);
+    const validMoves = this.getValidMoves(fromPiece);
 
     for (let i = 0; i < validMoves.length; i++) {
       let move = validMoves[i];
@@ -404,9 +400,6 @@ export class Board {
     return this.#row;
   }
 
-  getMoveEventListener() {
-    return this.#moveEventListener;
-  }
 
   static get NUM_OF_COLUMNS() {
     return Board.#NUM_OF_COLUMNS;

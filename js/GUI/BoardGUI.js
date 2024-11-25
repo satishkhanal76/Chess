@@ -211,27 +211,34 @@ export class BoardGUI {
       if(commandType === Command.TYPES.PROMOTION_COMMAND) {
         const pomotionModal = new PromotionModal(currentPlayer.getColour());
         const promotionPieceType = await pomotionModal.askForPromotionPiece();
-        console.log(promotionPieceType)
         move.setPromotionPieceType(promotionPieceType);
       }
 
-      const command = this.#game.movePiece(this.#game.getCurrentPlayer(), move);
-
-      this.#clickedPiece = null;
       this.removeValidSoptsMark();
+      this.#clickedPiece = null;
 
-      if (command && !command.isValid()) return;
-      const animation = await this.#animationHandler.animateCommand(command);
-      // this.flipBoard();
+      try {
+        const command = this.#game.movePiece(move);
+        if (command && !command.isValid()) return;
+        await this.#animationHandler.animateCommand(command);
+        
+      }catch(err) {
+        console.error(`Error making a move: ${err}`);
+      }
+
+      
 
       this.displayModalIfOver();
       this.updateButtons();
     } else {
       if (!piece) return null;
+      if(piece.getColour() !== this.#game.getCurrentPlayer().getColour()) return null;
 
       this.#clickedPiece = block;
 
-      let validMoves = this.#game.getCurrentPlayer().getValidMoves(piece);
+      // let validMoves = this.#game.getCurrentPlayer().getValidMoves(piece);
+      const validMoves = this.#game.getBoard().getValidMoves(piece);
+      
       if (!validMoves || validMoves.length < 1) {
         this.#clickedPiece = null;
       } else {

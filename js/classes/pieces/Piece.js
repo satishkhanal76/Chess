@@ -61,6 +61,30 @@ export class Piece {
     return availableSpots;
   }
 
+  // KEEP
+  getAllPieceMoves(piecePosition, boardCol, boardRow) {
+    let dimension = {
+      col: boardCol,
+      row: boardRow,
+    };
+
+    let availableSpots = [];
+
+    for (let i = 0; i < this.#moves.length; i++) {
+      const move = this.#moves[i];
+      const spots = move(dimension, {
+        col: piecePosition.getCol(),
+        row: piecePosition.getRow(),
+      });
+
+      availableSpots = availableSpots.concat(
+        spots
+      );
+    }
+
+    return availableSpots;
+  }
+
   checkPathForValidSpots(board, spots) {
     for (let i = 0; i < spots.length; i++) {
       let spot = spots[i];

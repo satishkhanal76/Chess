@@ -10,12 +10,15 @@ export default class DefaultMoveValidator extends ParentMoveValidator {
     let to;
     const board = this.getBoard();
 
-    let piecePosition = board.getPiecePosition(piece);
+    const piecePosition = board.getPiecePosition(piece);
 
-    validMoves = piece.getAvailableMoves(board);
+    // Get all the moves that the piece can do(constrains to the board)
+
+    validMoves = piece.getAvailableMoves(board); 
 
     for (let i = validMoves.length - 1; i >= 0; i--) {
       to = validMoves[i];
+      if(!to) continue;
 
       const toFileRank = FileRankFactory.getFileRank(to.col, to.row);
 

@@ -1,3 +1,4 @@
+
 export class Command {
   static TYPES = {
     MOVE_COMMAND: "MOVE_COMMAND",
@@ -6,18 +7,27 @@ export class Command {
     PROMOTION_COMMAND: "PROMOTION_COMMAND",
   };
 
+
   #executed;
   #type;
   #isValid;
+  #piecesAffected;
 
   constructor(type) {
     this.#type = type;
     this.#executed = false;
     this.#isValid = false;
+    this.#piecesAffected = [];
+
+
+  }
+
+  validate() {
+    console.log("Validation Not Implemented!");
   }
 
   execute() {
-    console.error("Not Implemented!");
+    if(!this.#isValid) throw new Error("Not a valid command!");
   }
 
   undo() {
@@ -26,15 +36,10 @@ export class Command {
 
   redo() {
     if(!(this.isExecuted() && this.isValid())) throw new Error("Can't redo an unexecuted or invalid command!");
-
   }
 
   getType() {
     return this.#type;
-  }
-
-  emit() {
-    console.error("Not Implemented");
   }
 
   isExecuted() {
@@ -51,5 +56,9 @@ export class Command {
 
   setIsValid(isValid) {
     this.#isValid = isValid;
+  }
+
+  getPiecesAffected() {
+    return this.#piecesAffected;
   }
 }

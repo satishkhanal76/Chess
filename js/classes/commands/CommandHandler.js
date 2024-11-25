@@ -92,6 +92,7 @@ export class CommandHandler {
 
     command.execute();
 
+
     if (!command.isValid()) {
       this.removeCommand(command);
       this.#decrementCurrentCommandIndex();

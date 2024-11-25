@@ -12,6 +12,7 @@ import { PromotionCommand } from "./commands/PromotionCommand.js";
 import { EnPassantCommand } from "./commands/EnPassantCommand.js";
 import { MoveCommand } from "./commands/MoveCommand.js";
 import { PieceFactory } from "./pieces/PieceFactory.js";
+import Listeners from "./Listeners.js";
 
 export class Game {
   #variant;
@@ -22,54 +23,38 @@ export class Game {
 
   #winner;
 
-  #validators = [];
+  #gameValidators = [];
   #isInProgress;
 
   #turnHandler;
 
+  #moveEventListeners;
+
+
   constructor(variant) {
     this.#variant = variant || new ClassicalVariant();
     this.#turnHandler = new TurnHandler();
+    this.#moveEventListeners = new Listeners();
 
     this.createBoard();
 
 
     this.resetGame();
 
-    this.addValidators();
-
-    this.#board.getMoveEventListener().addListener((event) => {
-      this.#isInProgress = true;
-
-      this.#validators.forEach((v) => v.onPieceMove(event.command));
-
-      this.validateGame();
-      this.#turnHandler.nextTurn();
-
-      const command = event.command;
-
-
-      try {
-        console.log(
-          command.getFrom().toString(),
-          "->",
-          command.getTo().toString()
-        );
-      } catch (err) {}
-    });
+    this.addGameValidators();
   }
 
   //TODO: variants should handle adding validators
-  addValidators() {
-    this.#validators.push(new CheckmateValidator(this));
-    this.#validators.push(new StalemateValidator(this));
-    this.#validators.push(new DeadPositionValidator(this));
-    this.#validators.push(new ThreeFoldRepitionValidator(this));
+  addGameValidators() {
+    this.#gameValidators.push(new CheckmateValidator(this));
+    this.#gameValidators.push(new StalemateValidator(this));
+    this.#gameValidators.push(new DeadPositionValidator(this));
+    this.#gameValidators.push(new ThreeFoldRepitionValidator(this));
   }
 
   validateGame() {
-    for (let i = 0; i < this.#validators.length; i++) {
-      const validator = this.#validators[i];
+    for (let i = 0; i < this.#gameValidators.length; i++) {
+      const validator = this.#gameValidators[i];
       validator.validate(this);
 
       const isGameOver = validator.getIsOver();
@@ -84,31 +69,66 @@ export class Game {
         this.#winner = validator.getWinner();
       }
 
-      console.log(this, validator);
-
       this.#isInProgress = false;
     }
   }
 
-  movePiece(player, move) {
-    //check to see if the current player is the player that is moving the piece
-    if(player !== this.#turnHandler.getCurrentPlayer()) throw new Error("Not the players turn!");
+  movePiece(requestedMove) {
+    // Check to see if the piece exists
+    const fromPiece = this.#board.getPiece(requestedMove.getFrom());
 
-    const from = move.getFrom(), to = move.getTo();
+    if(!fromPiece) throw new Error(`No Piece found at ${requestedMove.getFrom()}!`);
 
+
+    //check to see if the player is the valid one
+    if(!this.#isPlayerValid(requestedMove)) throw new Error(`This move can't be played by this player!`);
+
+
+    //get the command assciated with the move
+    const command = this.#getCommand(requestedMove);
+
+    //execute the command if it is valid
+    if(!command.isValid()) throw new Error("Not a valid command!");
+    
+    command.execute();
+    this.#board.getCommandHandler().addCommand(command);
+
+    //Validate if the game is over
+    this.validateGame();
+
+
+    //TODO: Pass the turn handler the game state to see if turn should change (don't change turn if it is over)
+    this.#turnHandler.nextTurn();
+    
+
+    //emit the command to listerners
+    this.#moveEventListeners.emit({
+      piecesAffected: command.getPiecesAffected(),
+      command: command,
+      isGameOver: this.#isOver,
+      winner: this.#winner,
+      player: this.#turnHandler.getPreviousPlayer()
+    })
+
+    return command;
+  }
+
+  #getCommand(requestedMove) {
+
+    const from = requestedMove.getFrom(), to = requestedMove.getTo();
     const fromPiece = this.#board.getPiece(from);
 
-    if(!fromPiece || fromPiece.getColour() !== player.getColour()) throw new Error("Can't move other players pieces.");
+    if(!fromPiece || fromPiece.getColour() !== fromPiece.getColour()) throw new Error("Can't move other players pieces.");
 
     let command;
 
-    switch(this.getCommandType(move)) {
+    switch(this.getCommandType(requestedMove)) {
       case Command.TYPES.CASTLE_COMMAND:
         command = new CastleCommand(this.#board, from, to);
       break;
 
       case Command.TYPES.PROMOTION_COMMAND:
-        command = new PromotionCommand(this.#board, from, to, PieceFactory.getPiece(move.getPromotionPieceType(), player.getColour()));
+        command = new PromotionCommand(this.#board, from, to, PieceFactory.getPiece(requestedMove.getPromotionPieceType(), fromPiece.getColour()));
       break;
 
       case Command.TYPES.EN_PASSANT_COMMAND:
@@ -118,17 +138,14 @@ export class Game {
       case Command.TYPES.MOVE_COMMAND:
         command = new MoveCommand(this.#board, from, to);
       break;
-
     }
-
-    //execute the command
-    command.execute();
-
-    if(command.isValid()) {
-      this.#board.getCommandHandler().addCommand(command);
-    }
-
     return command;
+  }
+
+  #isPlayerValid(requestedMove) {
+    const currentPlayer = this.#turnHandler.getCurrentPlayer();
+    const requestedMovePlayer = this.#turnHandler.getPlayer(this.#board.getPiece(requestedMove.getFrom()).getColour());
+    return (currentPlayer === requestedMovePlayer);
   }
 
   getCommandType(move) {
@@ -136,6 +153,7 @@ export class Game {
     const to = move.getTo();
 
     const fromPiece = this.#board.getPiece(from);
+    
     const toPiece = this.#board.getPiece(to);
     if (
       fromPiece?.getColour() === toPiece?.getColour() &&
@@ -197,5 +215,9 @@ export class Game {
 
   getTurnHandler() {
     return this.#turnHandler;
+  }
+
+  get moveEventListeners() {
+    return this.#moveEventListeners;
   }
 }

@@ -1,5 +1,6 @@
 import FileRankFactory from "../FileRankFactory.js";
 import { Command } from "./Command.js";
+import PieceAffect from "./PieceAffect.js";
 
 export class EnPassantCommand extends Command {
   #board;
@@ -24,35 +25,45 @@ export class EnPassantCommand extends Command {
       this.#from.getRow()
     );
 
-    this.#movingPiece = null;
-    this.#takingPiece = null;
+    this.#movingPiece = this.#board.getPiece(this.#from);
+    this.#takingPiece = this.#board.getPiece(this.#takingPiecePosition);
+
+    this.validate();
 
   }
 
-  execute() {
-    this.setExecuted(true);
 
-    this.#movingPiece = this.#board.getPiece(this.#from);
+  validate() {
 
-    this.#takingPiece = this.#board.getPiece(this.#takingPiecePosition);
-
-    if (!this.#movingPiece) {
-      return (this.setIsValid(false));
+    if(!this.#movingPiece) {
+      this.setIsValid(false);
+      throw new Error(`No piece found at ${this.#from}`);
     }
 
     if (!this.#board.isValidMove(this.#from, this.#to)) {
-      return (this.setIsValid(false));
+      this.setIsValid(false);
+      throw new Error("Not a valid move!")
     }
 
-    // console.log(this.#takingPiecePosition, this.#takingPiece);
+    this.setIsValid(true);
+  }
+
+  execute() {
+    super.execute();
 
     this.#board.movePiece(this.#movingPiece, this.#to);
     this.#board.removePiece(this.#takingPiecePosition);
 
     this.#movingPiece.moved(this.#from, this.#to);
-    this.emit();
 
-    this.setIsValid(true);
+    this.getPiecesAffected().push(new PieceAffect(this.#movingPiece, PieceAffect.AFFECT_TYPES.MOVE, this.#from, this.#to));
+    if(this.#takingPiece)
+    this.getPiecesAffected().push(new PieceAffect(this.#takingPiece, PieceAffect.AFFECT_TYPES.CAPTURE, this.#takingPiecePosition, null, this.#movingPiece));
+
+
+    this.setExecuted(true);
+
+
   }
 
   undo() {
@@ -68,11 +79,6 @@ export class EnPassantCommand extends Command {
     this.#board.removePiece(this.#takingPiecePosition);
   }
 
-  emit() {
-    this.#board.getMoveEventListener().emit({
-      command: this,
-    });
-  }
 
   getTakingPiecePosition() {
     return this.#takingPiecePosition;

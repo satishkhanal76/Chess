@@ -1,8 +1,6 @@
 export default class Move {
     #from;
     #to;
-
-    #metaData;
     
     #promotionPieceType;
 
