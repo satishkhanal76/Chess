@@ -1,59 +1,67 @@
 import { Command } from "../../classes/commands/Command.js";
-import CastleAnimation from "./CastleAnimation.js";
-import EnPassantAnimation from "./EnPassantAnimation.js";
 import MoveAnimation from "./MoveAnimation.js";
+import EnPassantAnimation from "./EnPassantAnimation.js";
+import CastleAnimation from "./CastleAnimation.js";
 import PromotionAnimation from "./PromotionAnimation.js";
 
+
+
 export default class AnimationHandler {
-  #board;
-  #activeAnimation;
-  #isAnimationInProgress;
-  constructor(board) {
-    this.#board = board;
-    this.#isAnimationInProgress = false;
+  static ANIMATION_MAP = {
+    [Command.TYPES.MOVE_COMMAND]: MoveAnimation,
+    [Command.TYPES.EN_PASSANT_COMMAND]: EnPassantAnimation,
+    [Command.TYPES.CASTLE_COMMAND]: CastleAnimation,
+    [Command.TYPES.PROMOTION_COMMAND]: PromotionAnimation
+  }
+
+  #gameGUI;
+  #activeAnimation = null;
+  #queue = []; // Animation queue
+  #isAnimating = false;
+
+  constructor(gameGUI) {
+    this.#gameGUI = gameGUI;
   }
 
   async animateCommand(command, undo = false) {
     if (!command) return this.#activeAnimation;
 
-    this.#isAnimationInProgress = true;
+    // Push the animation request into the queue
+    const animationPromise = new Promise((resolve) => {
+      this.#queue.push(() => this.#runAnimation(command, undo, resolve));
+    });
 
-    switch (command.getType()) {
-      case Command.TYPES.MOVE_COMMAND:
-        this.#activeAnimation = new MoveAnimation(this.#board, command, undo);
-        break;
-      case Command.TYPES.EN_PASSANT_COMMAND:
-        this.#activeAnimation = new EnPassantAnimation(
-          this.#board,
-          command,
-          undo
-        );
-        break;
-      case Command.TYPES.CASTLE_COMMAND:
-        this.#activeAnimation = new CastleAnimation(this.#board, command, undo);
-        break;
-      case Command.TYPES.PROMOTION_COMMAND:
-        this.#activeAnimation = new PromotionAnimation(
-          this.#board,
-          command,
-          undo
-        );
-        break;
-      default:
-        this.#board.updateBoard();
-        break;
+    // Start processing the queue if not already animating
+    if (!this.#isAnimating) {
+      this.#processQueue();
     }
 
+    return animationPromise;
+  }
+
+  async #runAnimation(command, undo, resolve) {
+    const AnimationClass = AnimationHandler.ANIMATION_MAP[command.getType()];
+    this.#activeAnimation = new AnimationClass(
+      this.#gameGUI.getBoardGUI(),
+      command,
+      undo
+    );
+
     await this.#activeAnimation.animate();
-    this.#isAnimationInProgress = false;
-    return this.#activeAnimation;
+    this.#activeAnimation = null;
+    resolve(); // Mark this animation as completed
+  }
+
+  async #processQueue() {
+    this.#isAnimating = true;
+    while (this.#queue.length > 0) {
+      const nextAnimation = this.#queue.shift();
+      await nextAnimation();
+    }
+    this.#isAnimating = false;
   }
 
   getActiveAnimation() {
     return this.#activeAnimation;
-  }
-
-  getIsAnimationInProgress() {
-    return this.#isAnimationInProgress;
   }
 }

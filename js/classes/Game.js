@@ -113,6 +113,17 @@ export class Game {
     return command;
   }
 
+  undoMove() {
+    const commandHandler = this.#board.getCommandHandler();
+
+    return commandHandler.undoCommand();
+  }
+
+  redoMove() {
+    const commandHandler = this.#board.getCommandHandler();
+    return commandHandler.redoCommand();
+  }
+
   #getCommand(requestedMove) {
 
     const from = requestedMove.getFrom(), to = requestedMove.getTo();

@@ -3,12 +3,13 @@ import { Piece } from "./classes/pieces/Piece.js";
 import { Player } from "./classes/players/Player.js";
 
 import { BoardGUI } from "./GUI/BoardGUI.js";
+import GameGUI from "./GUI/GameGUI.js";
 
 const SERVER_URL = "http://localhost:3000";
 
 
 let game = new Game();
-let boardGUI;
+const gameGUI = new GameGUI(game);
 
 const modal = document.getElementById("modal");
 modal.style.display = "none";
@@ -28,7 +29,7 @@ const initializeLocalGame = () => {
   game.addPlayer(new Player(game.getBoard(), Piece.COLOUR.WHITE));
   game.addPlayer(new Player(game.getBoard(), Piece.COLOUR.BLACK));
 
-  boardGUI = new BoardGUI(game, modal);
+
 
 
   // Add logic to initialize a chess game between two players on the same device
@@ -99,10 +100,10 @@ socket.on('gameInitializationSuccess', (gameData) => {
   console.log(gameData);
   console.log("Game Started from the server!");
 
-  if(gameData == Piece.COLOUR.BLACK) {
-    boardGUI.flipBoard();
+  // if(gameData == Piece.COLOUR.BLACK) {
+  //   boardGUI.flipBoard();
 
-  }
+  // }
 
 
   game.getBoard().getMoveEventListener().addListener((data) => {

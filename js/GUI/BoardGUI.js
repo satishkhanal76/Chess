@@ -9,6 +9,7 @@ import { MoveCommand } from "../classes/commands/MoveCommand.js";
 import Move from "../classes/Move.js";
 
 export class BoardGUI {
+  #gameGUI;
   #game;
   #board;
 
@@ -30,10 +31,13 @@ export class BoardGUI {
   #boardContainerElement;
 
 
-  constructor(game, modal) {
+  constructor(gameGUI, modal) {
     this.#flipped = false;
-    this.#game = game;
-    this.#board = game.getBoard();
+
+    this.#gameGUI = gameGUI;
+
+    this.#game = this.#gameGUI.getGame();
+    this.#board = this.#game.getBoard();
 
     this.#modal = modal;
 
@@ -42,8 +46,8 @@ export class BoardGUI {
     this.#createBlocks();
     this.updateBoard();
 
-    this.setupButtons();
-    this.#animationHandler = new AnimationHandler(this);
+    // this.setupButtons();
+    this.#animationHandler = this.#gameGUI.getAnimationHandler();
   }
 
   createBoard() {
@@ -134,56 +138,6 @@ export class BoardGUI {
     this.#element.remove();
   }
 
-  setupButtons() {
-    const prev = document.getElementById("previous");
-    const next = document.getElementById("next");
-    const current = document.getElementById("current");
-
-    prev.addEventListener("click", async () => {
-      if (this.#animationHandler.getIsAnimationInProgress()) return;
-      const command = this.#board.getCommandHandler().undoCommand();
-      this.#animationHandler.animateCommand(command, true);
-
-      this.updateButtons();
-    });
-
-    next.addEventListener("click", async () => {
-      if (this.#animationHandler.getIsAnimationInProgress()) return;
-
-      const command = this.#board.getCommandHandler().redoCommand();
-      this.#animationHandler.animateCommand(command, false);
-
-      this.updateButtons();
-    });
-
-    current.addEventListener("click", async () => {
-      if (this.#animationHandler.getIsAnimationInProgress()) return;
-
-      this.executeAllCommands();
-      this.updateButtons();
-    });
-
-    this.updateButtons();
-
-    document.addEventListener("keydown", async (eve) => {
-      switch (eve.key) {
-        case "ArrowLeft":
-          prev.click();
-          break;
-        case "ArrowRight":
-          next.click();
-          break;
-        case "Enter":
-          current.click();
-          break;
-        case "f":
-          this.flipBoard();
-          break;
-        default:
-          break;
-      }
-    });
-  }
 
   getBlock(fileRank) {
     return this.#blocks[fileRank.getRow()][fileRank.getCol()];
@@ -217,19 +171,14 @@ export class BoardGUI {
       this.removeValidSoptsMark();
       this.#clickedPiece = null;
 
-      try {
-        const command = this.#game.movePiece(move);
-        if (command && !command.isValid()) return;
-        await this.#animationHandler.animateCommand(command);
-        
-      }catch(err) {
-        console.error(`Error making a move: ${err}`);
-      }
 
-      
+      const command = this.#game.movePiece(move);
+      if (command && !command.isValid()) return;
+      // await this.#animationHandler.animateCommand(command);
+       
+
 
       this.displayModalIfOver();
-      this.updateButtons();
     } else {
       if (!piece) return null;
       if(piece.getColour() !== this.#game.getCurrentPlayer().getColour()) return null;
@@ -260,43 +209,11 @@ export class BoardGUI {
       if (!command) break;
 
       await this.#animationHandler.animateCommand(command, false);
-
-      this.updateButtons();
     } while (command);
   }
 
   getElement() {
     return this.#element;
-  }
-
-  updateButtons(disable = false) {
-    let prev = document.getElementById("previous");
-    let next = document.getElementById("next");
-    let current = document.getElementById("current");
-    let commandHandler = this.#board.getCommandHandler();
-
-    let currentCommandIndex = commandHandler.getCurrentCommandIndex();
-    let commandIndex = commandHandler.getCommandIndex();
-
-    prev.disabled = true;
-    next.disabled = true;
-    current.disabled = true;
-
-    if (currentCommandIndex === -1 && commandIndex === -1) return;
-
-    if (currentCommandIndex <= commandIndex && currentCommandIndex > -1) {
-      prev.disabled = false;
-    }
-    if (currentCommandIndex < commandIndex) {
-      next.disabled = false;
-      current.disabled = false;
-    }
-
-    if (disable) {
-      prev.disabled = false;
-      next.disabled = false;
-      current.disabled = false;
-    }
   }
 
   /**
