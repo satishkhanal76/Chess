@@ -99,4 +99,12 @@ export class EnPassantCommand extends Command {
   getMovingPiece() {
     return this.#movingPiece;
   }
+
+  toString() {
+    return JSON.stringify({
+      type: this.getType(),
+      from: this.#from,
+      to: this.#to,
+    });
+  }
 }

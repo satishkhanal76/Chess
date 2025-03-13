@@ -14,17 +14,33 @@
     <main>
       <h1>Chess</h1>
       <div class="top-section" id="top-section">
+        <label for="game-type">Game Type:</label>
+        <select name="game-type" id="game-type">
+          <option value="local">Local</option>
+          <option value="online">Online</option>
+        </select>
         
+        <form id="game-room-form" action="">
+          <label for="room-code">Room Code:</label>
+          <input type="text" name="room-code" id="room-code" placeholder="Enter Room Code!" />
+          <button id="join-room-button" type="submit">Join Room</button>
+          <button id="create-room-button">Create Room</button>
+        </form>
+
+        <div class="game-room-id" id="game-room-id">
+          <span>Room Code:</span>
+          <span id="room-id"></span>
+        </div>
       </div>
       <div class="layout-split">
         <div class="game-container">
           <div class="player-display top">
-            <div class="name">Black</div>
+            <div class="name" id="black">Black</div>
             <div class="pieces-taken"></div>
           </div>
           <div id="board-container" class="board-container"></div>
           <div class="player-display bottom">
-            <div class="name">White</div>
+            <div class="name" id="white">White</div>
             <div class="pieces-taken"></div>
           </div>
         </div>

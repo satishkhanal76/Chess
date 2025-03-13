@@ -107,7 +107,8 @@ export class Game {
       command: command,
       isGameOver: this.#isOver,
       winner: this.#winner,
-      player: this.#turnHandler.getPreviousPlayer()
+      player: this.#turnHandler.getPreviousPlayer(),
+      requestedMove: requestedMove
     })
 
     return command;

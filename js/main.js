@@ -1,86 +1,50 @@
+import FileRankFactory from "./classes/FileRankFactory.js";
 import { Game } from "./classes/Game.js";
+import Move from "./classes/Move.js";
 import { Piece } from "./classes/pieces/Piece.js";
 import { Player } from "./classes/players/Player.js";
+import Socket from "./classes/sockets/Socket.js";
+import Client from "./Client.js";
 
-import { BoardGUI } from "./GUI/BoardGUI.js";
 import GameGUI from "./GUI/GameGUI.js";
 
-const SERVER_URL = "http://localhost:3000";
+const SERVER_URL = window.location.origin;
 
 
-let game = new Game();
-const gameGUI = new GameGUI(game);
+// Target Elements
+const gameTypeElement = document.getElementById("game-type");
+const gameRoomForm = document.getElementById("game-room-form");
+const joinRoomButton = document.getElementById("join-room-button");
+const createRoomButton = document.getElementById("create-room-button");
+const gameRoomID = document.getElementById("game-room-id");
+const roomIdElement = document.getElementById("room-id");
+
+
+//hide Game Room Form until it is a online Option
+gameRoomID.style.display = "none";
+gameRoomForm.style.display = "none";
+gameRoomForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+});
+
+
+const client = new Client();
+
 
 const modal = document.getElementById("modal");
 modal.style.display = "none";
 
 
-game.moveEventListeners.addListener((payload) => {
-  console.log(payload)
-})
 
-
-// Handle the game type choosing
-const topSection = document.getElementById("top-section");
 
 const initializeLocalGame = () => {
   console.log('Starting a local game...');
 
-  game.addPlayer(new Player(game.getBoard(), Piece.COLOUR.WHITE));
-  game.addPlayer(new Player(game.getBoard(), Piece.COLOUR.BLACK));
-
-
-
-
-  // Add logic to initialize a chess game between two players on the same device
+  
+  client.setGameType(Client.GAME_TYPE.LOCAL);
+  client.setupGame();
 }
 initializeLocalGame();
-const initializeOnlineGame = (socket) => {
-  console.log('Starting an online game...');
-  // Add logic to connect to an online server or peer-to-peer connection
-
-  socket.emit("initializeGame", {})
-}
-
-// create option element for the game type
-const createOption = (value, text) => {
-  const option = document.createElement("option");
-  option.innerText = text;
-  option.setAttribute("value", value);
-
-  return option;
-}
-
-//create the game type elements
-const createGameTypeElements = (socket) => {
-  const gameTypeLabel = document.createElement("label");
-  gameTypeLabel.setAttribute("for", "game-type");
-  gameTypeLabel.innerText = "Coose your game mode:";
-  
-  if(document.getElementById("game-type")) return;
-
-  
-  const selectElement = document.createElement("select");
-  selectElement.setAttribute("id", "game-type");
-
-  selectElement.addEventListener("change", (eve) => {
-      const type = eve.target.value;
-      
-      if (type === 'local') {
-        initializeLocalGame();
-    } else if (type === 'online') {
-        initializeOnlineGame(socket);
-    }
-  })
-
-  selectElement.append(createOption("local", "Play in Person"));
-  selectElement.append(createOption("online", "Play online"));
-
-
-  topSection.append(gameTypeLabel);
-  topSection.append(selectElement);
-
-}
 
 
 // Import or use Socket.IO from a CDN
@@ -91,45 +55,89 @@ const socket = io(SERVER_URL, {
   reconnectionDelay: 1000, // Delay between reconnections (in ms)
 });
 
-// Attempt to connect
-// socket.connect();
 
-
-
-socket.on('gameInitializationSuccess', (gameData) => {
-  console.log(gameData);
-  console.log("Game Started from the server!");
-
-  // if(gameData == Piece.COLOUR.BLACK) {
-  //   boardGUI.flipBoard();
-
-  // }
-
-
-  game.getBoard().getMoveEventListener().addListener((data) => {
-    console.log(data);
-  })
-})
-
-
-// Listen for connection success
-socket.on("connect", () => {
-  //add the option to play against someone online
-  createGameTypeElements(socket);
-
+// Connected to Server
+socket.on(Socket.EVENTS.CONNECTION_SUCCESS, () => {
+  client.setSocket(socket);
   console.log("Connected to server:", socket.id);
 });
 
 // Handle connection error
-socket.on("connect_error", (error) => {
+socket.on(Socket.EVENTS.CONNECTION_ERROR, (error) => {
   console.warn("Connection failed:", error.message);
 
   // Optionally stop reconnect attempts after a certain number of tries
   socket.io.opts.reconnection = false; // Disable further reconnections
 });
 
-// Handle disconnection
-socket.on("disconnect", (reason) => {
+// Disconnected from server
+socket.on(Socket.EVENTS.USER_DISCONNECT, (reason) => {
   console.log("Disconnected from server:", reason);
 });
 
+
+socket.on(Socket.EVENTS.ROOM_JOIN_SUCCESS, (payload) => {
+  // start server game when room join success
+  client.setSocket(socket);
+  client.setRoomId(payload.roomId);
+  client.setGameType(Client.GAME_TYPE.ONLINE);
+  client.setupGame();
+  client.startOnlineGame();
+
+
+  gameRoomForm.style.display = "none";
+
+  roomIdElement.innerText = payload.roomId;
+  gameRoomID.style.display = "block";
+});
+
+
+
+socket.on(Socket.EVENTS.MOVE_INVALID, (payload) => {
+  console.error(payload);
+})
+
+
+socket.on(Socket.EVENTS.ROOM_NOT_FOUND, (payload) => {
+  alert(payload.message);
+});
+
+socket.on(Socket.EVENTS.ROOM_DESTROYED, (payload) => {
+  alert(payload.message);
+  gameRoomID.style.display = "none";
+  gameRoomForm.style.display = "block";
+}
+);
+
+socket.on(Socket.EVENTS.ROOM_PLAYER_LEFT, (payload) => {
+  alert(payload.message);
+})
+
+
+gameTypeElement.addEventListener("change", (event) => {
+  const gameType = event.target.value;
+
+  switch(gameType) {
+    case "online":
+      // Attempt to connect
+      socket.connect();
+      gameRoomForm.style.display = "block";
+
+      break;
+    case "local":
+      initializeLocalGame();
+      gameRoomForm.style.display = "none";
+      break;
+  }
+});
+
+// Join Room Button Handler
+joinRoomButton.addEventListener("click", () => {
+  const roomCode = document.getElementById("room-code").value;
+
+  socket.emit(Socket.EVENTS.JOIN_ROOM, roomCode);
+});
+
+createRoomButton.addEventListener("click", () => {
+  socket.emit(Socket.EVENTS.CREATE_ROOM);
+}); 

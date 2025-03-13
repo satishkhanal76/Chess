@@ -1,6 +1,5 @@
 import FileRank from "./FileRank.js";
 import FileRankFactory from "./FileRankFactory.js";
-import Listeners from "./Listeners.js";
 import MoveValidator from "./MoveValidators/MoveValidator.js";
 import { CommandHandler } from "./commands/CommandHandler.js";
 import { Piece } from "./pieces/Piece.js";
@@ -261,13 +260,22 @@ export class Board {
    * @returns if the is checked
    */
   isKingInCheck(colour) {
-    const king = Board.filterColouredPieces(
-      this.getPiecesByType(Piece.TYPE.KING),
-      colour
-    ).pop();
+    const king = this.getKingByColour(colour);
 
     if (!king) return false;
     return this.isPieceUnderAttack(king);
+  }
+
+  /**
+   * Finds and returns the king of a certain colour
+   * @param {*} colour the colour of the king to get
+   * @returns the king of that colour
+   */
+  getKingByColour(colour) {
+    return Board.filterColouredPieces(
+      this.getPiecesByType(Piece.TYPE.KING),
+      colour
+    ).pop();
   }
 
   isInCheckmate(colour) {

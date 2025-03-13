@@ -106,4 +106,12 @@ export class PromotionCommand extends Command {
     return this.#promotionPiece;
   }
 
+  toString() {
+    return JSON.stringify({
+      type: this.getType(),
+      from: this.#from,
+      to: this.#to,
+      promotionPieceType: this.#promotionPiece.getType()
+    });
+  }
 }

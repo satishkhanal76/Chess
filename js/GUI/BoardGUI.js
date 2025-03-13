@@ -2,10 +2,7 @@ import { Piece } from "../classes/pieces/Piece.js";
 import { BlockGUI } from "./BlockGUI.js";
 import FileRankFactory from "../classes/FileRankFactory.js";
 import { Command } from "../classes/commands/Command.js";
-import MoveAnimation from "./animations/MoveAnimation.js";
-import AnimationHandler from "./animations/AnimationHandler.js";
 import PromotionModal from "./PromotionModal.js";
-import { MoveCommand } from "../classes/commands/MoveCommand.js";
 import Move from "../classes/Move.js";
 
 export class BoardGUI {
@@ -130,8 +127,6 @@ export class BoardGUI {
     } else {
       this.#boardContainerElement.classList.remove("flipped");
     }
-
-    this.setupDisplay();
   }
 
   removeBoard() {
@@ -171,14 +166,8 @@ export class BoardGUI {
       this.removeValidSoptsMark();
       this.#clickedPiece = null;
 
+      this.#gameGUI.makeMove(move);
 
-      const command = this.#game.movePiece(move);
-      if (command && !command.isValid()) return;
-      // await this.#animationHandler.animateCommand(command);
-       
-
-
-      this.displayModalIfOver();
     } else {
       if (!piece) return null;
       if(piece.getColour() !== this.#game.getCurrentPlayer().getColour()) return null;
@@ -236,7 +225,7 @@ export class BoardGUI {
     let winner = this.#game.getWinner();
 
     if (winner) {
-      let winnerCharacter = winner.findKing().getCharacter();
+      let winnerCharacter = this.#board.getKingByColour(winner.getColour()).getCharacter();
       text.textContent = `${
         winner?.getColour() === Piece.COLOUR.WHITE ? "White" : "Black"
       } wins!`;
@@ -372,7 +361,9 @@ export class BoardGUI {
     const players = this.#game.getPlayers();
 
     players.forEach((player) => {
-      const kingPos = this.#board.getPiecePosition(player.findKing());
+      const kingPos = this.#board.getPiecePosition(
+        this.#board.getKingByColour(player.getColour())
+      );
       const block = this.getBlock(kingPos);
 
       if (this.#board.isKingInCheck(player.getColour())) {

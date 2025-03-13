@@ -25,6 +25,8 @@ export default class BoardButtons {
         this.#nextButton = new ButtonGUI("next");
         this.#currentButton = new ButtonGUI("current");
 
+        this.#element.innerHTML = "";
+
         this.#element.appendChild(this.#prevButton.getElement());
         this.#element.appendChild(this.#nextButton.getElement());
         this.#element.appendChild(this.#currentButton.getElement());

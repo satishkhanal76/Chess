@@ -154,4 +154,12 @@ export class CastleCommand extends Command {
   getMovingPiece() {
     return this.#king;
   }
+
+  toString() {
+    return JSON.stringify({
+      type: this.getType(),
+      from: this.#kingPosition,
+      to: this.#kingNewPosition,
+    });
+  }
 }

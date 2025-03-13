@@ -8,9 +8,11 @@ export default class GameGUI {
   #buttonsGUI;
 
   #animationHandler;
+  #canOnlyColourMove; //keeps track if only one colour can move
 
   constructor(game) {
     this.#game = game;
+    this.#canOnlyColourMove = null;
 
 
     const modal = document.getElementById("modal");
@@ -29,10 +31,29 @@ export default class GameGUI {
 
 
   #addEventListeners() {
-    this.#game.moveEventListeners.addListener((payload) => {
-      this.#animationHandler.animateCommand(payload.command);
+    this.#game.moveEventListeners.addListener(async (payload) => {
+      await this.#animationHandler.animateCommand(payload.command);
+      this.#boardGUI.updateBoard();
+      this.#boardGUI.updateCheckStyling();
       this.#buttonsGUI.updateButtons();
+      this.#boardGUI.displayModalIfOver();
     })
+  }
+
+
+  // Called by board gui when the user wants to make a move
+  makeMove(move) {
+    if(this.#canOnlyColourMove && this.#canOnlyColourMove !== this.#game.getCurrentPlayer().getColour()) return;
+    
+    try {
+      const command = this.#game.movePiece(move);
+      if(command && !command.isValid()) return;
+
+    }catch(err) {
+      console.error("Invalid command!");
+    }
+
+
   }
 
 
@@ -51,6 +72,10 @@ export default class GameGUI {
 
   getAnimationHandler() {
     return this.#animationHandler;
+  }
+
+  setCanOnlyColourMove(colour) {
+    this.#canOnlyColourMove = colour;
   }
 
 }

@@ -47,4 +47,11 @@ export default class FileRank {
   toString() {
     return this.getFileRank();
   }
+
+  toJSON() {
+    return {
+      col: this.#col,
+      row: this.#row
+    }
+  }
 }

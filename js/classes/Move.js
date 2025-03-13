@@ -4,6 +4,8 @@ export default class Move {
     
     #promotionPieceType;
 
+    #by;
+
     constructor(from, to, { promotionPieceType } = {}) {
         this.#from = from;
         this.#to = to;

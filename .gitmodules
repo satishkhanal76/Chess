@@ -1,0 +1,3 @@
+[submodule "Chess"]
+	path = Chess
+	url = https://github.com/satishkhanal76/Chess.git
