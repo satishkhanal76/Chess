@@ -46,9 +46,12 @@ const initializeLocalGame = () => {
 }
 initializeLocalGame();
 
+const isDev = window.location.hostname === "localhost";
+
 
 // Import or use Socket.IO from a CDN
 const socket = io(SERVER_URL, {
+  path: isDev ? "/socket.io" : "/chess/socket.io",
   autoConnect: false, // Prevent automatic connection
   reconnection: true, // Allow reconnection attempts
   reconnectionAttempts: 5, // Limit number of reconnection attempts
