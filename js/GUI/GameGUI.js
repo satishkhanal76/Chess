@@ -1,3 +1,5 @@
+import PieceAffect from "../classes/commands/PieceAffect.js";
+import { Piece } from "../classes/pieces/Piece.js";
 import BoardButtons from "./BoardButtons.js";
 import { BoardGUI } from "./BoardGUI.js";
 import AnimationHandler from "./animations/AnimationHandler.js";
@@ -37,6 +39,23 @@ export default class GameGUI {
       this.#boardGUI.updateCheckStyling();
       this.#buttonsGUI.updateButtons();
       this.#boardGUI.displayModalIfOver();
+    })
+
+    this.#game.moveEventListeners.addListener((payload) => {
+      const capturedPieces = payload.piecesAffected.filter((p) => p.getAffectType() === PieceAffect.AFFECT_TYPES.CAPTURE).map((p) => p.getPiece());
+      const blackCapturedPiecesElement = document.getElementById("blackCapturedPieces");
+      const whiteCapturedPiecesElement = document.getElementById("whiteCapturedPieces");
+
+
+      capturedPieces.forEach(piece => {
+        const pieceElement = document.createElement("span");
+        pieceElement.textContent = piece.getCharacter();
+
+        (piece.getColour() === Piece.COLOUR.WHITE) ?
+          blackCapturedPiecesElement.appendChild(pieceElement)
+        : whiteCapturedPiecesElement.appendChild(pieceElement);
+      });
+
     })
   }
 

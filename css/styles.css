@@ -70,6 +70,10 @@ main {
   min-height: 1.5em;
 }
 .board-container {
+  --block-width: 50px;
+  --block-height: 50px;
+
+
   display: grid;
 
   grid-template-areas:
@@ -82,9 +86,6 @@ main {
 
 .board {
   /* --num-of-rows: 3; */
-  --block-width: 50px;
-  --block-height: 50px;
-
   grid-area: board;
 
   position: relative;
@@ -125,7 +126,7 @@ main {
 }
 .rank.highlighted,
 .file.highlighted {
-  background-color: rgb(102, 102, 102);
+  /* background-color: rgb(102, 102, 102); */
 }
 
 .board-container.flipped {
@@ -305,14 +306,14 @@ main {
 }
 
 @media only screen and (max-width: 600px) {
-  .board {
+  .board-container {
     --block-width: 45px;
     --block-height: 45px;
   }
 }
 
 @media only screen and (max-width: 500px) {
-  .board {
+  .board-container {
     --block-width: 40px;
     --block-height: 40px;
   }

@@ -55,15 +55,6 @@ export class BoardGUI {
     this.#element.classList.add("board");
     this.#element.id = "board";
 
-    this.#boardContainerElement.style.setProperty(
-      "--block-width",
-      BlockGUI.BLOCK_WIDTH + "px"
-    );
-    this.#boardContainerElement.style.setProperty(
-      "--block-height",
-      BlockGUI.BLOCK_HEIGHT + "px"
-    );
-
     //create the ranks
     const ranks = document.createElement("div");
     ranks.classList.add("ranks-container");
