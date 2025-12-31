@@ -12,8 +12,8 @@ export default class OnlineGame  extends ClientGame{
     #roomId;
 
 
-    constructor(socket, roomId) {
-        super();
+    constructor(socket, roomId, variant) {
+        super(variant);
 
         this.#socket = socket;
         this.#roomId = roomId;
@@ -78,6 +78,9 @@ export default class OnlineGame  extends ClientGame{
     }
 
     startServerGame() {
-        this.#socket.emit(Socket.EVENTS.CREATE_GAME, this.#roomId);
+        this.#socket.emit(Socket.EVENTS.CREATE_GAME, {
+            roomId: this.#roomId,
+            variant: this.getGameVariant()
+        });
     }
 }

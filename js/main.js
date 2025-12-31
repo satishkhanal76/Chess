@@ -1,18 +1,13 @@
-import FileRankFactory from "./classes/FileRankFactory.js";
-import { Game } from "./classes/Game.js";
-import Move from "./classes/Move.js";
-import { Piece } from "./classes/pieces/Piece.js";
-import { Player } from "./classes/players/Player.js";
+
 import Socket from "./classes/sockets/Socket.js";
 import Client from "./Client.js";
-
-import GameGUI from "./GUI/GameGUI.js";
 
 const SERVER_URL = window.location.origin;
 
 
 // Target Elements
 const gameTypeElement = document.getElementById("game-type");
+const gameModeElement = document.getElementById("game-mode");
 const gameRoomForm = document.getElementById("game-room-form");
 const joinRoomButton = document.getElementById("join-room-button");
 const createRoomButton = document.getElementById("create-room-button");
@@ -118,7 +113,17 @@ socket.on(Socket.EVENTS.ROOM_PLAYER_LEFT, (payload) => {
 
 
 gameTypeElement.addEventListener("change", (event) => {
-  const gameType = event.target.value;
+    gameOptionsChange();
+});
+
+gameModeElement.addEventListener("change", (event) => {
+    gameOptionsChange();
+});
+
+const gameOptionsChange = () => {
+  const gameType = gameTypeElement.value;
+  const selectedMode = gameModeElement.value;
+  client.setGameVariant(selectedMode);
 
   switch(gameType) {
     case "online":
@@ -132,7 +137,7 @@ gameTypeElement.addEventListener("change", (event) => {
       gameRoomForm.style.display = "none";
       break;
   }
-});
+}
 
 // Join Room Button Handler
 joinRoomButton.addEventListener("click", () => {

@@ -49,6 +49,7 @@ export class BoardGUI {
 
   createBoard() {
     this.#boardContainerElement = document.getElementById("board-container");
+    this.#boardContainerElement.innerHTML = "";
 
     //create the board
     this.#element = document.createElement("div");
