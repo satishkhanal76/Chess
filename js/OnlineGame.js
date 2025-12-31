@@ -80,7 +80,7 @@ export default class OnlineGame  extends ClientGame{
     startServerGame() {
         this.#socket.emit(Socket.EVENTS.CREATE_GAME, {
             roomId: this.#roomId,
-            variant: this.getGameVariant().getVariantName()
+            variant: this.getVariant().getVariantName()
         });
     }
 }
