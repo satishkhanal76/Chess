@@ -3,9 +3,13 @@ import FileRankFactory from "../FileRankFactory.js";
 import ClassicalSet from "../board-sets/ClassicalSet.js";
 
 export default class ClassicalVariant {
+  #variantName;
   #board;
   #boardSet;
-  constructor() {
+
+  constructor(variantName) {
+
+    this.#variantName = variantName || "classical";
     this.createBoard();
   }
 
@@ -33,5 +37,9 @@ export default class ClassicalVariant {
 
   getBoardSet() {
     return this.#boardSet;
+  }
+
+  getVariantName() {
+    return this.#variantName;
   }
 }

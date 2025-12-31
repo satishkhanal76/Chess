@@ -4,8 +4,8 @@ import CustomSet from "../board-sets/CustomSet.js";
 import ClassicalVariant from "./ClassicalVariant.js";
 
 export default class TwoQueenVariant extends ClassicalVariant {
-  constructor() {
-    super();
+  constructor(variantName) {
+    super(variantName);
   }
 
   createBoard() {

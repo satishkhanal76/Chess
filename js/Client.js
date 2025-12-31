@@ -42,10 +42,10 @@ export default class Client{
     static getGameVariantObject(variant) {
         switch(variant) {
             case "two-queen":
-                return new TwoQueenVariant();
+                return new TwoQueenVariant("two-queen");
                 break;
             default:
-                return new ClassicalVariant();
+                return new ClassicalVariant("classical");
                 break;
         }
     }
