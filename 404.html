@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google tag (gtag.js) -->
+    <script defer src="https://satishkhanal.com/analytics.js"></script>
+    <title>Chess</title>
+
+    <link rel="stylesheet" href="./css/styles.css" />
+    <script src="./js/404.js" type="module" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>Error 404 - No Kings Found</h1>
+      <div class="layout-split">
+        <div class="game-container">
+          <div class="player-display top">
+            <div class="name" id="black">Black</div>
+            <div class="pieces-taken" id="blackCapturedPieces"></div>
+          </div>
+          <div id="board-container" class="board-container"></div>
+          <div class="player-display bottom">
+            <div class="name" id="white">White</div>
+            <div class="pieces-taken" id="whiteCapturedPieces"></div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </main>
+    <div class="modal-container">
+      <div id="modal" class="modal">
+        <div class="top">
+          <h5 class="modal-title">Stalemate!</h5>
+          <span id="modal-close" class="modal-close">X</span>
+        </div>
+        <div class="display"></div>
+      </div>
+    </div>
+  </body>
+</html>

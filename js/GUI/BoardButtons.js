@@ -13,6 +13,7 @@ export default class BoardButtons {
 
         this.#gameGUI = gameGUI;
         this.#element = document.getElementById("buttons-container");
+        if(!this.#element) return;
 
         this.#createButtons();
         this.#addEventListeners();
