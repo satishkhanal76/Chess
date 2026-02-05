@@ -93,13 +93,14 @@ export class Game {
     command.execute();
     this.#board.getCommandHandler().addCommand(command);
 
-    //Validate if the game is over
-    this.validateGame();
-
 
     //TODO: Pass the turn handler the game state to see if turn should change (don't change turn if it is over)
     this.#turnHandler.nextTurn();
     
+
+    //Validate if the game is over
+    this.validateGame();
+
 
     //emit the command to listerners
     this.#moveEventListeners.emit({
