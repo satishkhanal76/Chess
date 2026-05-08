@@ -3,6 +3,7 @@ import { PieceFactory } from "../pieces/PieceFactory.js";
 
 export default class ClassicalSet {
   #FEN_STRING = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+
   #board;
   constructor(board) {
     this.#board = board;

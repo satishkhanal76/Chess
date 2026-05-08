@@ -15,8 +15,10 @@ export default class CheckmateValidator extends GameValidator {
     let leftPlayer = players.filter(
       (player) => !board.isInCheckmate(player.getColour())
     );
-
-    this.setWinner(this.getGame().getCurrentPlayer());
-    if (leftPlayer.length <= 1) this.setIsOver(true);
+    
+    if (leftPlayer.length <= 1) {
+      this.setIsOver(true);
+      this.setWinner(leftPlayer[0] || null);
+    }
   }
 }
