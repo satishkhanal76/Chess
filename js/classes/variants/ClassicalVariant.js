@@ -1,6 +1,10 @@
 import { Board } from "../Board.js";
 import FileRankFactory from "../FileRankFactory.js";
 import ClassicalSet from "../board-sets/ClassicalSet.js";
+import CheckmateValidator from "../validators/CheckmateValidator.js";
+import StalemateValidator from "../validators/StalemateValidator.js";
+import DeadPositionValidator from "../validators/DeadPositionValidator.js";
+import ThreeFoldRepitionValidator from "../validators/ThreeFoldRepitionValidator.js";
 
 export default class ClassicalVariant {
   #variantName;
@@ -37,6 +41,15 @@ export default class ClassicalVariant {
 
   getBoardSet() {
     return this.#boardSet;
+  }
+
+  getGameValidators(game) {
+    return [
+      new CheckmateValidator(game),
+      new StalemateValidator(game),
+      new DeadPositionValidator(game),
+      new ThreeFoldRepitionValidator(game),
+    ];
   }
 
   getVariantName() {

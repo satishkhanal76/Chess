@@ -1,11 +1,7 @@
 import { Piece } from "./pieces/Piece.js";
 import GameValidator from "./validators/GameValidator.js";
-import CheckmateValidator from "./validators/CheckmateValidator.js";
-import StalemateValidator from "./validators/StalemateValidator.js";
 import ClassicalVariant from "./variants/ClassicalVariant.js";
-import DeadPositionValidator from "./validators/DeadPositionValidator.js";
 import TurnHandler from "./utilities/TurnHandler.js";
-import ThreeFoldRepitionValidator from "./validators/ThreeFoldRepitionValidator.js";
 import { Command } from "./commands/Command.js";
 import { CastleCommand } from "./commands/CastleCommand.js";
 import { PromotionCommand } from "./commands/PromotionCommand.js";
@@ -44,12 +40,8 @@ export class Game {
     this.addGameValidators();
   }
 
-  //TODO: variants should handle adding validators
   addGameValidators() {
-    this.#gameValidators.push(new CheckmateValidator(this));
-    this.#gameValidators.push(new StalemateValidator(this));
-    this.#gameValidators.push(new DeadPositionValidator(this));
-    this.#gameValidators.push(new ThreeFoldRepitionValidator(this));
+    this.#gameValidators = this.#variant.getGameValidators(this);
   }
 
   validateGame() {
