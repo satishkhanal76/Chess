@@ -3,11 +3,13 @@ import { Piece } from "../classes/pieces/Piece.js";
 import BoardButtons from "./BoardButtons.js";
 import { BoardGUI } from "./BoardGUI.js";
 import AnimationHandler from "./animations/AnimationHandler.js";
+import GameOverModal from "./GameOverModal.js";
 
 export default class GameGUI {
   #game;
   #boardGUI;
   #buttonsGUI;
+  #gameOverModal;
 
   #animationHandler;
   #canOnlyColourMove; //keeps track if only one colour can move
@@ -22,8 +24,10 @@ export default class GameGUI {
 
     this.#animationHandler = new AnimationHandler(this);
 
+    this.#gameOverModal = new GameOverModal(modal);
 
-    this.#boardGUI = new BoardGUI(this, modal);
+
+    this.#boardGUI = new BoardGUI(this);
     this.#buttonsGUI = new BoardButtons(this);
 
 
@@ -38,7 +42,7 @@ export default class GameGUI {
       this.#boardGUI.updateBoard();
       this.#boardGUI.updateCheckStyling();
       this.#buttonsGUI.updateButtons();
-      this.#boardGUI.displayModalIfOver();
+      this.#gameOverModal.displayIfOver(this.#game);
     })
 
     this.#game.moveEventListeners.addListener((payload) => {

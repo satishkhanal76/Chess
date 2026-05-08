@@ -16,7 +16,6 @@ export class BoardGUI {
 
   #clickedPiece;
 
-  #modal;
 
   #flipped;
 
@@ -28,15 +27,13 @@ export class BoardGUI {
   #boardContainerElement;
 
 
-  constructor(gameGUI, modal) {
+  constructor(gameGUI) {
     this.#flipped = false;
 
     this.#gameGUI = gameGUI;
 
     this.#game = this.#gameGUI.getGame();
     this.#board = this.#game.getBoard();
-
-    this.#modal = modal;
 
     this.createBoard();
 
@@ -197,53 +194,6 @@ export class BoardGUI {
     return this.#element;
   }
 
-  /**
-   * This method is a mess- need to refactor later
-   * @returns
-   */
-  displayModalIfOver() {
-    let isGameOver = this.#game.isOver();
-
-    if (!isGameOver) return null;
-
-    let text = this.#modal.querySelector(".modal-title");
-    let display = this.#modal.querySelector(".display");
-
-    let avatar = document.createElement("div");
-    avatar.classList.add("avatar");
-    let avatar2 = document.createElement("div");
-    avatar2.classList.add("avatar");
-
-    let winner = this.#game.getWinner();
-
-    if (winner) {
-      let winnerCharacter = this.#board.getKingByColour(winner.getColour()).getCharacter();
-      text.textContent = `${
-        winner?.getColour() === Piece.COLOUR.WHITE ? "White" : "Black"
-      } wins!`;
-      display.classList.add("win");
-      avatar.classList.add(
-        `win-${winner?.getColour() === Piece.COLOUR.WHITE ? "white" : "black"}`
-      );
-      avatar.textContent = winnerCharacter;
-      display.appendChild(avatar);
-    } else {
-      text.textContent = `Stalemate!`;
-      display.classList.add("stalemate");
-      avatar.textContent = "♔";
-      avatar2.textContent = "♚";
-      display.appendChild(avatar);
-      display.appendChild(avatar2);
-    }
-
-    this.#modal.style.display = "block";
-
-    const closeButton = this.#modal.querySelector("#modal-close");
-
-    closeButton.addEventListener("click", () => {
-      this.#modal.style.display = "none";
-    });
-  }
 
   showValidMoves(validMoves) {
     validMoves.forEach((move) => {
