@@ -74,7 +74,7 @@ export default class OnlineGame  extends ClientGame{
 
     flipBoardIfBlack() {
         if(this.#playerColour === Piece.COLOUR.BLACK) 
-            this.getGameGUI().getBoardGUI().flipBoard();
+            this.getGameGUI().setBoardOrientation(Piece.COLOUR.BLACK);
     }
 
     startServerGame() {
