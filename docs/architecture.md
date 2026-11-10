@@ -565,3 +565,9 @@ OnlineGame
 ```
 
 This keeps the core engine independent of the browser interface and allows it to be reused by other applications, including the multiplayer server.
+
+# npm Package Boundary
+
+The reusable package entry point is `src/index.js`, which exports the stable engine API. The package build copies `js/classes/` and this entry point into `dist/`. `package.json` includes only `dist/`, the README, and the license, so the browser GUI, HTML, CSS, and client modules are not part of the published package.
+
+The `./classes/*` package export retains access to existing engine modules for integrations that need lower-level classes. ChessMultiplayer's current submodule imports can continue using the unchanged `Chess/js/classes/...` source paths while it chooses when to migrate.

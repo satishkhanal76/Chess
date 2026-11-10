@@ -1,0 +1,18 @@
+export { Game } from "../js/classes/Game.js";
+export { Board } from "../js/classes/Board.js";
+export { default as Move } from "../js/classes/Move.js";
+export { default as FileRank } from "../js/classes/FileRank.js";
+export { default as FileRankFactory } from "../js/classes/FileRankFactory.js";
+export { Player } from "../js/classes/players/Player.js";
+export { Piece } from "../js/classes/pieces/Piece.js";
+export { PieceFactory, PIECE_DATA } from "../js/classes/pieces/PieceFactory.js";
+export { default as ClassicalVariant } from "../js/classes/variants/ClassicalVariant.js";
+export { default as TwoQueenVariant } from "../js/classes/variants/TwoQueenVariant.js";
+export { default as FourOFourVariant } from "../js/classes/variants/FourOFourVariant.js";
+export { default as ClassicalSet } from "../js/classes/board-sets/ClassicalSet.js";
+export { default as CustomSet } from "../js/classes/board-sets/CustomSet.js";
+export { default as GameValidator } from "../js/classes/validators/GameValidator.js";
+export { default as CheckmateValidator } from "../js/classes/validators/CheckmateValidator.js";
+export { default as StalemateValidator } from "../js/classes/validators/StalemateValidator.js";
+export { default as DeadPositionValidator } from "../js/classes/validators/DeadPositionValidator.js";
+export { default as ThreeFoldRepitionValidator } from "../js/classes/validators/ThreeFoldRepitionValidator.js";
