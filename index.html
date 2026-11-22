@@ -1,11 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#202020" />
-    <meta name="description" content="Play classic or two-queen chess locally or online with friends." />
+    <meta
+      name="description"
+      content="Play classic or two-queen chess locally or online with friends."
+    />
     <!-- Google tag (gtag.js) -->
     <script defer src="https://satishkhanal.com/analytics.js"></script>
     <title>Chess Multiplayer | Satish Khanal</title>
@@ -17,30 +20,96 @@
   <body>
     <main>
       <h1>Chess</h1>
-      <div class="top-section" id="top-section">
-        <label for="game-mode">Game Mode:</label>
-        <select name="game-mode" id="game-mode">
-          <option value="classical">Classic</option>
-          <option value="two-queen">Two Queen</option>
-        </select>
-
-        <label for="game-type">Game Type:</label>
-        <select name="game-type" id="game-type">
-          <option value="local">Local</option>
-          <option value="online">Online</option>
-        </select>
-        
-        <form id="game-room-form" action="">
-          <label for="room-code">Room Code:</label>
-          <input type="text" name="room-code" id="room-code" placeholder="Enter Room Code!" />
-          <button id="join-room-button" type="submit">Join Room</button>
-          <button id="create-room-button">Create Room</button>
-        </form>
-
-        <div class="game-room-id" id="game-room-id">
-          <span>Room Code:</span>
-          <span id="room-id"></span>
+      <section class="setup-panel" id="setup-panel" aria-labelledby="setup-heading">
+        <div class="setup-heading">
+          <div>
+            <p class="eyebrow">A new match</p>
+            <h2 id="setup-heading">Set up your game</h2>
+          </div>
+          <label class="field compact-field" for="game-type">
+            <span>Play</span>
+            <select id="game-type" name="game-type">
+              <option value="local">Locally</option>
+              <option value="online">Online</option>
+            </select>
+          </label>
         </div>
+
+        <div class="setup-grid">
+          <label class="field" for="game-mode">
+            <span>Variant</span>
+            <select id="game-mode" name="game-mode">
+              <option value="classical">Classical chess</option>
+              <option value="two-queen">Two Queen</option>
+            </select>
+          </label>
+          <label class="field" for="time-control">
+            <span>Time control</span>
+            <select id="time-control" name="time-control">
+              <option value="none">No clock</option>
+              <option value="3+2">3 + 2</option>
+              <option value="5+0">5 + 0</option>
+              <option value="10+0">10 + 0</option>
+              <option value="15+10">15 + 10</option>
+            </select>
+          </label>
+          <label class="field" id="opponent-field" for="opponent-type">
+            <span>Opponent</span>
+            <select id="opponent-type" name="opponent-type">
+              <option value="human">Another player here</option>
+              <option value="bot">Play against the bot</option>
+            </select>
+          </label>
+          <label class="field" id="player-colour-field" for="player-colour" hidden>
+            <span>Your side</span>
+            <select id="player-colour" name="player-colour">
+              <option value="WHITE">White</option>
+              <option value="BLACK">Black</option>
+            </select>
+          </label>
+          <label class="field" id="bot-difficulty-field" for="bot-difficulty" hidden>
+            <span>Bot strength</span>
+            <select id="bot-difficulty" name="bot-difficulty">
+              <option value="1">Casual</option>
+              <option value="2" selected>Standard</option>
+              <option value="3">Challenging</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="setup-actions" id="local-actions">
+          <button id="start-local-button" type="button">Start game</button>
+        </div>
+
+        <div class="setup-actions online-actions" id="online-actions" hidden>
+          <p class="setup-hint">Create a room with these settings, or join a friend’s room.</p>
+          <button id="create-room-button" type="button">Create room</button>
+          <form id="game-room-form">
+            <label class="field join-code-field" for="room-code">
+              <span>Room code</span>
+              <input
+                type="text"
+                name="room-code"
+                id="room-code"
+                placeholder="Enter room code"
+                autocomplete="off"
+              />
+            </label>
+            <button id="join-room-button" type="submit" class="secondary-button">Join room</button>
+          </form>
+        </div>
+        <p id="setup-feedback" class="setup-feedback" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="room-banner" id="game-room-id" hidden aria-live="polite">
+        <span id="room-label">Share this room code with your opponent</span>
+        <strong id="room-id"></strong>
+        <button id="copy-room-button" type="button" class="secondary-button">Copy code</button>
+      </section>
+
+      <div class="game-status-wrap">
+        <p class="game-status" id="game-status" role="status" hidden></p>
+        <button type="button" class="secondary-button" id="new-game-button" hidden>New game</button>
       </div>
       <div class="layout-split">
         <div class="game-container">
@@ -54,16 +123,29 @@
             <div class="pieces-taken" id="bottomCapturedPieces"></div>
           </div>
         </div>
-        <div class="buttons-container" id="buttons-container">
-        </div>
+        <div class="buttons-container" id="buttons-container"></div>
       </div>
       <div class="game-actions" id="game-actions"></div>
+      <section class="move-history-panel" aria-labelledby="move-history-heading">
+        <div class="move-history-heading">
+          <div>
+            <h2 id="move-history-heading">Move history</h2>
+          </div>
+          <div class="move-history-actions">
+            <span id="move-history-summary" class="move-history-summary"></span>
+            <button type="button" id="copy-moves-button" class="secondary-button">Copy moves</button>
+            <button type="button" id="download-moves-button" class="secondary-button">Download moves</button>
+          </div>
+        </div>
+        <ol id="move-history" class="move-history" aria-label="Moves played"></ol>
+        <span id="move-history-feedback" class="move-history-feedback" role="status" aria-live="polite"></span>
+      </section>
     </main>
     <div class="modal-container">
-      <div id="modal" class="modal">
+      <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="top">
-          <h5 class="modal-title">Stalemate!</h5>
-          <span id="modal-close" class="modal-close">X</span>
+          <h5 id="modal-title" class="modal-title">Game over</h5>
+          <button type="button" id="modal-close" class="modal-close" aria-label="Close result">×</button>
         </div>
         <div class="display"></div>
       </div>

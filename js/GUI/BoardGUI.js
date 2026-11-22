@@ -273,6 +273,25 @@ export class BoardGUI {
     });
   }
 
+  renderPosition(position) {
+    this.#element.style.setProperty("--num-of-columns", this.#board.getColumn());
+    position.pieces.forEach((row, rowIndex) => {
+      row.forEach((character, colIndex) => {
+        const block = this.getBlock(FileRankFactory.getFileRank(colIndex, rowIndex));
+        block.setText(character || " ");
+        block.hideAsValidBlock();
+        block.removeCheckStyle();
+      });
+    });
+    position.checkedKingSquares.forEach(({ row, col }) => {
+      this.getBlock(FileRankFactory.getFileRank(col, row)).addCheckStyle();
+    });
+  }
+
+  setHistoryPreview(isPreviewing) {
+    this.#boardContainerElement.classList.toggle("is-history-preview", Boolean(isPreviewing));
+  }
+
   removeValidSoptsMark() {
     this.#forEachBlock((block) => {
       block.hideAsValidBlock();

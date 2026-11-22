@@ -26,14 +26,15 @@ export default class Client{
 
     }
 
-    setupGame(gameVariant) {
-        if (gameVariant) this.#gameVariant = gameVariant;
+    setupGame(options = {}) {
+        if (typeof options === "string") this.#gameVariant = options;
+        const { settings = {} } = typeof options === "object" ? options : {};
         switch(this.#gameType) {
             case Client.GAME_TYPE.LOCAL:
                 this.#clientGame = new LocalGame(Client.getGameVariantObject(this.#gameVariant));
             break;
             case Client.GAME_TYPE.ONLINE:
-                this.#clientGame = new OnlineGame(this.#socket, this.#roomId, Client.getGameVariantObject(this.#gameVariant));
+                this.#clientGame = new OnlineGame(this.#socket, this.#roomId, Client.getGameVariantObject(this.#gameVariant), settings);
             break;
             default:
 
@@ -69,7 +70,6 @@ export default class Client{
 
     setGameVariant(gameVariant) {
         this.#gameVariant = gameVariant;
-        this.#clientGame.setupGame();
     }
 
     getGameVariant() {
@@ -80,8 +80,8 @@ export default class Client{
         return this.#clientGame;
     }
 
-    startOnlineGame() {
+    startOnlineGame(settings) {
         if(!(this.#clientGame instanceof OnlineGame)) throw new Error("Game type is not online!");
-        this.#clientGame.startServerGame();
+        this.#clientGame.startServerGame(settings);
     }
 }

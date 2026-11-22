@@ -11,9 +11,11 @@ export default class ButtonGUI {
 
 
     #createElement(key) {
+        const labels = { prev: "← Previous", next: "Next →", current: "Latest" };
         this.#element = document.createElement("button");
         this.#element.setAttribute("id", key);
-        this.#element.textContent = key;
+        this.#element.textContent = labels[key] || key;
+        this.#element.setAttribute("aria-label", labels[key] || key);
     }
 
 

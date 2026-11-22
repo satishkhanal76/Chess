@@ -58,6 +58,7 @@ export default class AnimationHandler {
       const nextAnimation = this.#queue.shift();
       await nextAnimation();
     }
+    this.#gameGUI.syncBoardAfterAnimations();
     this.#isAnimating = false;
   }
 

@@ -3,6 +3,7 @@ import GameGUI from "./GUI/GameGUI.js";
 import {Game} from "./classes/Game.js";
 import { Player } from "./classes/players/Player.js";
 import { Piece } from "./classes/pieces/Piece.js";
+import { createClockForTimeControl } from "./classes/clock/TimeControls.js";
 
 export default class ClientGame {
 
@@ -48,5 +49,13 @@ export default class ClientGame {
 
     getGameGUI() {
         return this.#gameGUI;
+    }
+
+    startGame({ timeControl = "none" } = {}) {
+        const clock = createClockForTimeControl(timeControl);
+        if (clock) this.#game.setClock(clock);
+        this.#gameGUI.setGameStarted(true);
+        if (clock) this.#game.startClock();
+        this.#gameGUI.refreshControls();
     }
 }

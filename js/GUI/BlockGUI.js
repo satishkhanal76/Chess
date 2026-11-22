@@ -1,3 +1,5 @@
+import { renderPieceMarkup } from "./PieceRenderer.js";
+
 export class BlockGUI {
   #fileRank;
 
@@ -53,7 +55,9 @@ export class BlockGUI {
   }
   setText(text) {
     this.#text = text;
-    this.#element.textContent = this.#text;
+    const pieceMarkup = renderPieceMarkup(this.#text);
+    if (pieceMarkup) this.#element.innerHTML = pieceMarkup;
+    else this.#element.textContent = this.#text;
   }
 
   async fadeInText(text) {
@@ -66,7 +70,9 @@ export class BlockGUI {
 
       this.#element.append(fadeInElement);
 
-      fadeInElement.textContent = text;
+      const pieceMarkup = renderPieceMarkup(text);
+      if (pieceMarkup) fadeInElement.innerHTML = pieceMarkup;
+      else fadeInElement.textContent = text;
       fadeInElement.style.animation = `zoom-in ${this.#textFadeInTime}ms`;
 
       fadeInElement.addEventListener("animationend", () => {

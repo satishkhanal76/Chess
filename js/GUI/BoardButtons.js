@@ -36,52 +36,29 @@ export default class BoardButtons {
 
     #addEventListeners() {
         this.#prevButton.addClickEventListener(() => {
-            const command = this.#gameGUI.getGame().undoMove();
-            this.#gameGUI.getAnimationHandler().animateCommand(command, true);
-            
-            this.updateButtons();
+            this.#gameGUI.stepBackInTimeline();
         })
 
         this.#nextButton.addClickEventListener(() => {
-            const command = this.#gameGUI.getGame().redoMove();
-            this.#gameGUI.getAnimationHandler().animateCommand(command);
-            
-            this.updateButtons();
+            this.#gameGUI.stepForwardInTimeline();
         })
 
         this.#currentButton.addClickEventListener(() => {
-            const game = this.#gameGUI.getGame();
-            let command;
-            do {
-                command = game.redoMove();
-
-                if (!command) break;
-
-                this.#gameGUI.getAnimationHandler().animateCommand(command, false);
-            } while (command);
-
-            this.updateButtons()
+            this.#gameGUI.followLatestInTimeline();
         });
     }
 
     updateButtons() {
-        const commandHandler = this.#gameGUI.getGame().getBoard().getCommandHandler();
-        const currentCommandIndex = commandHandler.getCurrentCommandIndex();
-        const commandIndex = commandHandler.getCommandIndex();
+        const { index, latestIndex } = this.#gameGUI.getTimelineState();
 
         this.#prevButton.disable();
         this.#nextButton.disable();
         this.#currentButton.disable();
 
-        if (currentCommandIndex === -1 && commandIndex === -1) return;
-
-        if (currentCommandIndex <= commandIndex && currentCommandIndex > -1) {
-            this.#prevButton.enable();
-        }
-
-        if (currentCommandIndex < commandIndex) {
-        this.#nextButton.enable();
-        this.#currentButton.enable();
+        if (index > 0) this.#prevButton.enable();
+        if (index < latestIndex) {
+            this.#nextButton.enable();
+            this.#currentButton.enable();
         }
     }
 

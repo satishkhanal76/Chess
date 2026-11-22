@@ -22,6 +22,7 @@ export { default as FenPosition, INITIAL_FEN } from "../js/classes/position/FenP
 export { default as GameState } from "../js/classes/position/GameState.js";
 export { default as PositionHistory } from "../js/classes/position/PositionHistory.js";
 export { default as ChessClock } from "../js/classes/clock/ChessClock.js";
+export { TIME_CONTROLS, createClockForTimeControl } from "../js/classes/clock/TimeControls.js";
 export { default as SanNotation } from "../js/classes/notation/SanNotation.js";
 export { default as PgnExporter } from "../js/classes/notation/PgnExporter.js";
 export { default as PgnImporter } from "../js/classes/notation/PgnImporter.js";

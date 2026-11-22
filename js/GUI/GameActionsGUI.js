@@ -1,23 +1,17 @@
-import ChessClock from "../classes/clock/ChessClock.js";
 import { Piece } from "../classes/pieces/Piece.js";
-
-const PRESETS = {
-  "5+0": { minutes: 5, increment: 0 },
-  "3+2": { minutes: 3, increment: 2 },
-  "10+0": { minutes: 10, increment: 0 },
-  "15+10": { minutes: 15, increment: 10 },
-};
 
 export default class GameActionsGUI {
   #game;
   #root;
-  #clockSelect;
-  #clockButton;
+  #clockRow;
+  #pauseButton;
   #whiteClock;
   #blackClock;
   #drawButton;
   #claimButton;
   #resignButton;
+  #gameStarted = false;
+  #isOnline = false;
 
   constructor(game) {
     this.#game = game;
@@ -29,37 +23,30 @@ export default class GameActionsGUI {
   }
 
   #createControls() {
-    const clocks = document.createElement("div");
-    clocks.className = "game-clocks";
-    this.#whiteClock = this.#makeClock("White", "05:00");
-    this.#blackClock = this.#makeClock("Black", "05:00");
-    clocks.append(this.#whiteClock.root, this.#blackClock.root);
+    this.#clockRow = document.createElement("div");
+    this.#clockRow.className = "game-clocks";
+    this.#whiteClock = this.#makeClock("White");
+    this.#blackClock = this.#makeClock("Black");
+    this.#clockRow.append(this.#whiteClock.root, this.#blackClock.root);
 
     const actions = document.createElement("div");
     actions.className = "game-action-buttons";
-    this.#clockSelect = document.createElement("select");
-    this.#clockSelect.setAttribute("aria-label", "Time control");
-    for (const preset of Object.keys(PRESETS)) {
-      const option = document.createElement("option");
-      option.value = preset;
-      option.textContent = `${preset} clock`;
-      this.#clockSelect.append(option);
-    }
-    this.#clockButton = this.#makeButton("Start clock");
+    this.#pauseButton = this.#makeButton("Pause clock");
     this.#drawButton = this.#makeButton("Offer draw");
     this.#claimButton = this.#makeButton("Claim draw");
     this.#resignButton = this.#makeButton("Resign");
-    actions.append(this.#clockSelect, this.#clockButton, this.#drawButton, this.#claimButton, this.#resignButton);
-    this.#root.replaceChildren(clocks, actions);
+    actions.append(this.#pauseButton, this.#drawButton, this.#claimButton, this.#resignButton);
+    this.#root.replaceChildren(this.#clockRow, actions);
+    this.#root.hidden = true;
   }
 
-  #makeClock(label, initialTime) {
+  #makeClock(label) {
     const root = document.createElement("div");
     root.className = "game-clock";
     const name = document.createElement("span");
     name.textContent = label;
     const value = document.createElement("strong");
-    value.textContent = initialTime;
+    value.textContent = "00:00";
     root.append(name, value);
     return { root, value };
   }
@@ -72,7 +59,13 @@ export default class GameActionsGUI {
   }
 
   #bindEvents() {
-    this.#clockButton.addEventListener("click", () => this.#toggleClock());
+    this.#pauseButton.addEventListener("click", () => {
+      const clock = this.#game.getClock();
+      if (!clock) return;
+      if (clock.getState().activeColour) clock.pause();
+      else this.#game.startClock();
+      this.update();
+    });
     this.#drawButton.addEventListener("click", () => this.#handleDrawOffer());
     this.#claimButton.addEventListener("click", () => {
       this.#game.claimDraw(this.#game.getCurrentPlayer()?.getColour());
@@ -86,23 +79,6 @@ export default class GameActionsGUI {
     });
     this.#game.moveEventListeners.addListener(() => this.update());
     this.#game.resultEventListeners.addListener(() => this.update());
-  }
-
-  #toggleClock() {
-    let clock = this.#game.getClock();
-    if (!clock) {
-      const preset = PRESETS[this.#clockSelect.value];
-      clock = new ChessClock({
-        initialTimeMs: preset.minutes * 60000,
-        incrementMs: preset.increment * 1000,
-      });
-      this.#game.setClock(clock);
-      clock.subscribe(() => this.update());
-    }
-
-    if (clock.getState().activeColour) clock.pause();
-    else this.#game.startClock();
-    this.update();
   }
 
   #handleDrawOffer() {
@@ -120,24 +96,28 @@ export default class GameActionsGUI {
     return `${minutes}:${seconds}`;
   }
 
+  setGameStarted(started) {
+    this.#gameStarted = Boolean(started);
+    this.update();
+  }
+
   update() {
     if (!this.#root) return;
     const gameOver = this.#game.isOver();
     const clock = this.#game.getClock();
     const currentColour = this.#game.getCurrentPlayer()?.getColour();
     const offer = this.#game.getDrawOffer();
+    this.#root.hidden = !this.#gameStarted;
+    this.#clockRow.hidden = !clock;
+    this.#pauseButton.hidden = !clock || this.#isOnline;
 
-    this.#clockSelect.disabled = Boolean(clock) || gameOver;
-    this.#clockButton.disabled = gameOver || !this.#game.getIsInProgress();
-    this.#clockButton.textContent = clock
-      ? (clock.getState().activeColour ? "Pause clock" : "Resume clock")
-      : "Start clock";
     if (clock) {
       const state = clock.getState();
       this.#whiteClock.value.textContent = this.#formatTime(state.white);
       this.#blackClock.value.textContent = this.#formatTime(state.black);
       this.#whiteClock.root.classList.toggle("active", state.activeColour === "white");
       this.#blackClock.root.classList.toggle("active", state.activeColour === "black");
+      this.#pauseButton.textContent = state.activeColour ? "Pause clock" : "Resume clock";
     }
 
     this.#drawButton.textContent = !offer
@@ -145,13 +125,14 @@ export default class GameActionsGUI {
       : offer === currentColour
         ? "Draw offered"
         : "Accept draw";
-    this.#drawButton.disabled = gameOver || Boolean(offer && offer === currentColour);
-    this.#claimButton.disabled = gameOver || !this.#game.canClaimDraw();
-    this.#resignButton.disabled = gameOver || !currentColour;
+    this.#drawButton.disabled = gameOver || (offer && offer === currentColour) || this.#isOnline;
+    this.#claimButton.disabled = gameOver || !this.#game.canClaimDraw() || this.#isOnline;
+    this.#resignButton.disabled = gameOver || !currentColour || this.#isOnline;
+    this.#pauseButton.disabled = gameOver || !clock;
   }
 
   setOnlineMode(isOnline) {
-    this.#root?.classList.toggle("is-online", isOnline);
-    if (isOnline && this.#root) this.#root.hidden = true;
+    this.#isOnline = Boolean(isOnline);
+    this.update();
   }
 }

@@ -130,11 +130,12 @@ export class Game {
     this.#turnHandler.nextTurn();
 
     this.#positionHistory.record(this.getPositionKey());
-    this.#moveRecords.push({
+    const moveRecord = {
       moveNumber: before.gameState.fullmoveNumber,
       colour: movingColour,
       san: SanNotation.addCheckSuffix(this.#board, san, movingColour),
-    });
+    };
+    this.#moveRecords.push(moveRecord);
 
     //Validate if the game is over
     this.validateGame();

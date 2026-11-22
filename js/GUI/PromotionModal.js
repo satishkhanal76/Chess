@@ -1,4 +1,5 @@
 import { PIECE_DATA } from "../classes/pieces/PieceFactory.js";
+import { renderPieceMarkup } from "./PieceRenderer.js";
 
 export default class PromotionModal {
   #modalElement;
@@ -22,7 +23,9 @@ export default class PromotionModal {
     promotablePieces.forEach((pieceData) => {
       const element = document.createElement("div");
       element.classList.add("promotion-modal-item");
-      element.textContent = pieceData.character;
+      const pieceMarkup = renderPieceMarkup(pieceData.character);
+      if (pieceMarkup) element.innerHTML = pieceMarkup;
+      else element.textContent = pieceData.character;
 
       element.addEventListener("click", () => {
         this.#pieceToBePromotedTo = pieceData.type;

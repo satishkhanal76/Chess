@@ -13,6 +13,7 @@ export default class Socket {
         ROOM_PLAYER_LEFT: "roomPlayerLeft",
         CREATE_GAME: "createGame",
         GAME_CREATED: "gameCreated",
+        GAME_STARTED: "gameStarted",
         MOVE_PIECE: "movePiece",
         MOVE_INVALID: "moveInvalid"
     }

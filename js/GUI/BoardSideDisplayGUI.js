@@ -1,5 +1,6 @@
 import PieceAffect from "../classes/commands/PieceAffect.js";
 import { Piece } from "../classes/pieces/Piece.js";
+import { renderPieceMarkup } from "./PieceRenderer.js";
 
 export default class BoardSideDisplayGUI {
   #topCapturedPiecesElement;
@@ -46,15 +47,29 @@ export default class BoardSideDisplayGUI {
     });
   }
 
-  #addCapturedPiece(piece) {
-    const pieceElement = document.createElement("span");
-    pieceElement.textContent = piece.getCharacter();
-
-    this.#getCapturedPiecesContainer(piece).appendChild(pieceElement);
+  renderCapturedPieces(capturedPieces = []) {
+    this.#topCapturedPiecesElement.replaceChildren();
+    this.#bottomCapturedPiecesElement.replaceChildren();
+    capturedPieces.forEach(({ character, colour }) => {
+      this.#addCapturedCharacter(character, colour);
+    });
   }
 
-  #getCapturedPiecesContainer(piece) {
-    const isBottomColour = piece.getColour() === this.#bottomColour;
+  #addCapturedPiece(piece) {
+    this.#addCapturedCharacter(piece.getCharacter(), piece.getColour());
+  }
+
+  #addCapturedCharacter(character, colour) {
+    const pieceElement = document.createElement("span");
+    const pieceMarkup = renderPieceMarkup(character);
+    if (pieceMarkup) pieceElement.innerHTML = pieceMarkup;
+    else pieceElement.textContent = character;
+
+    this.#getCapturedPiecesContainer(colour).appendChild(pieceElement);
+  }
+
+  #getCapturedPiecesContainer(colour) {
+    const isBottomColour = colour === this.#bottomColour;
 
     return isBottomColour
       ? this.#topCapturedPiecesElement
