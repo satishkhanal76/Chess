@@ -50,10 +50,10 @@ export default class BoardButtons {
         })
 
         this.#currentButton.addClickEventListener(() => {
-            const commandHandler = this.#gameGUI.getGame().getBoard().getCommandHandler();
+            const game = this.#gameGUI.getGame();
             let command;
             do {
-                command = commandHandler.redoCommand();
+                command = game.redoMove();
 
                 if (!command) break;
 

@@ -8,8 +8,10 @@ export default class DeadPositionValidator extends GameValidator {
 
   validate() {
     this.setIsOver(false);
+    this.setIsOver(DeadPositionValidator.isDeadPosition(this.getGame().getBoard()));
+  }
 
-    const board = this.getGame().getBoard();
+  static isDeadPosition(board) {
     const pieces = board.getAllPieces();
     const nonKingPieces = pieces.filter(
       (piece) => piece.getType() !== Piece.TYPE.KING
@@ -17,8 +19,7 @@ export default class DeadPositionValidator extends GameValidator {
 
     // King vs King
     if (nonKingPieces.length === 0) {
-      this.setIsOver(true);
-      return;
+      return true;
     }
 
     // King + minor piece vs King
@@ -29,14 +30,13 @@ export default class DeadPositionValidator extends GameValidator {
         pieceType === Piece.TYPE.BISHOP ||
         pieceType === Piece.TYPE.KNIGHT
       ) {
-        this.setIsOver(true);
+        return true;
       }
-
-      return;
+      return false;
     }
 
     // Only continue for two remaining non-king pieces
-    if (nonKingPieces.length !== 2) return;
+    if (nonKingPieces.length !== 2) return false;
 
     const [firstPiece, secondPiece] = nonKingPieces;
 
@@ -45,18 +45,19 @@ export default class DeadPositionValidator extends GameValidator {
       firstPiece.getType() !== Piece.TYPE.BISHOP ||
       secondPiece.getType() !== Piece.TYPE.BISHOP
     ) {
-      return;
+      return false;
     }
 
     const firstPosition = board.getPiecePosition(firstPiece);
     const secondPosition = board.getPiecePosition(secondPiece);
 
-    const firstSquareColor = (firstPosition.getFile() + firstPosition.getRank()) % 2;
-    const secondSquareColor = (secondPosition.getFile() + secondPosition.getRank()) % 2;
+    const firstSquareColor = (firstPosition.getCol() + firstPosition.getRow()) % 2;
+    const secondSquareColor = (secondPosition.getCol() + secondPosition.getRow()) % 2;
 
     // King + Bishop vs King + Bishop on same-colored squares
     if (firstSquareColor === secondSquareColor) {
-      this.setIsOver(true);
+      return true;
     }
+    return false;
   }
 }

@@ -16,6 +16,19 @@ export default class TurnHandler {
     return this.getCurrentPlayer();
   }
 
+  previousTurn() {
+    if (this.#players.length === 0) return null;
+    this.#currentPlayerIndex =
+      (this.#currentPlayerIndex - 1 + this.#players.length) % this.#players.length;
+    return this.getCurrentPlayer();
+  }
+
+  setCurrentPlayerColour(colour) {
+    const index = this.#players.findIndex((player) => player.getColour() === colour);
+    if (index >= 0) this.#currentPlayerIndex = index;
+    return this.getCurrentPlayer();
+  }
+
   getPreviousPlayer() {
     const numPlayers = this.#players.length;
     const previousPlayerIndex =

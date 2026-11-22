@@ -4,6 +4,7 @@ import AnimationHandler from "./animations/AnimationHandler.js";
 import GameOverModal from "./GameOverModal.js";
 import BoardSideDisplayGUI from "./BoardSideDisplayGUI.js";
 import { Piece } from "../classes/pieces/Piece.js";
+import GameActionsGUI from "./GameActionsGUI.js";
 
 export default class GameGUI {
   #game;
@@ -13,6 +14,7 @@ export default class GameGUI {
   #gameOverModal;
 
   #animationHandler;
+  #gameActionsGUI;
   #canOnlyColourMove; //keeps track if only one colour can move
 
   constructor(game) {
@@ -31,6 +33,7 @@ export default class GameGUI {
     this.#boardGUI = new BoardGUI(this);
     this.#buttonsGUI = new BoardButtons(this);
     this.#boardSideDisplayGUI = new BoardSideDisplayGUI();
+    this.#gameActionsGUI = new GameActionsGUI(this.#game);
 
     this.#addEventListeners();
   }
@@ -46,6 +49,10 @@ export default class GameGUI {
     
     this.#game.moveEventListeners.addListener((payload) => {
       this.#boardSideDisplayGUI.highlightCurrentTurn(this.#game.getCurrentPlayer().getColour());
+    });
+
+    this.#game.resultEventListeners.addListener(() => {
+      this.#gameOverModal.displayIfOver(this.#game);
     });
   }
 
@@ -108,6 +115,14 @@ export default class GameGUI {
   setBoardOrientation(bottomColour) {
     this.#boardSideDisplayGUI.setBoardOrientation(bottomColour);
     this.#boardGUI.flipBoard();
+  }
+
+  setOnlineMode(isOnline) {
+    this.#gameActionsGUI.setOnlineMode(isOnline);
+  }
+
+  refreshControls() {
+    this.#gameActionsGUI.update();
   }
 
 }

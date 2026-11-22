@@ -16,6 +16,30 @@ export default class EnPassantValidator extends ParentMoveValidator {
     if (piece.getType() !== Piece.TYPE.PAWN) return moves;
 
     const board = this.getBoard();
+    const targetSquare = board.getEnPassantTarget?.();
+    if (targetSquare) {
+      const target = FileRankFactory.getFileRank(targetSquare);
+      const origin = board.getPiecePosition(piece);
+      const direction = piece.getColour() === Piece.COLOUR.WHITE ? -1 : 1;
+      const victimPosition = FileRankFactory.getFileRank(
+        target.getCol(),
+        target.getRow() - direction
+      );
+      const victim = board.getPiece(victimPosition);
+      const isAdjacent =
+        origin.getRow() === target.getRow() - direction &&
+        Math.abs(origin.getCol() - target.getCol()) === 1;
+
+      if (
+        isAdjacent &&
+        victim?.getType() === Piece.TYPE.PAWN &&
+        victim.getColour() !== piece.getColour() &&
+        !board.willEnPassantPutKingInCheck(origin, target, victimPosition)
+      ) {
+        moves.push({ col: target.getCol(), row: target.getRow() });
+      }
+      return moves;
+    }
 
     // En passant Logic
 

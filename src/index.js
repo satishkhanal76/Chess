@@ -16,3 +16,13 @@ export { default as CheckmateValidator } from "../js/classes/validators/Checkmat
 export { default as StalemateValidator } from "../js/classes/validators/StalemateValidator.js";
 export { default as DeadPositionValidator } from "../js/classes/validators/DeadPositionValidator.js";
 export { default as ThreeFoldRepitionValidator } from "../js/classes/validators/ThreeFoldRepitionValidator.js";
+export { default as FiveFoldRepetitionValidator } from "../js/classes/validators/FiveFoldRepetitionValidator.js";
+export { default as SeventyFiveMoveValidator } from "../js/classes/validators/SeventyFiveMoveValidator.js";
+export { default as FenPosition, INITIAL_FEN } from "../js/classes/position/FenPosition.js";
+export { default as GameState } from "../js/classes/position/GameState.js";
+export { default as PositionHistory } from "../js/classes/position/PositionHistory.js";
+export { default as ChessClock } from "../js/classes/clock/ChessClock.js";
+export { default as SanNotation } from "../js/classes/notation/SanNotation.js";
+export { default as PgnExporter } from "../js/classes/notation/PgnExporter.js";
+export { default as PgnImporter } from "../js/classes/notation/PgnImporter.js";
+export { default as SearchEngine } from "../js/classes/engine/SearchEngine.js";

@@ -5,15 +5,20 @@ import CheckmateValidator from "../validators/CheckmateValidator.js";
 import StalemateValidator from "../validators/StalemateValidator.js";
 import DeadPositionValidator from "../validators/DeadPositionValidator.js";
 import ThreeFoldRepitionValidator from "../validators/ThreeFoldRepitionValidator.js";
+import FiveFoldRepetitionValidator from "../validators/FiveFoldRepetitionValidator.js";
+import SeventyFiveMoveValidator from "../validators/SeventyFiveMoveValidator.js";
+import FenPosition, { INITIAL_FEN } from "../position/FenPosition.js";
 
 export default class ClassicalVariant {
   #variantName;
   #board;
   #boardSet;
+  #startingFen;
 
-  constructor(variantName) {
+  constructor(variantName, startingFen = INITIAL_FEN) {
 
     this.#variantName = variantName || "classical";
+    this.#startingFen = startingFen;
     this.createBoard();
   }
 
@@ -21,6 +26,7 @@ export default class ClassicalVariant {
     this.setBoard(new Board(8, 8));
     FileRankFactory.resetFileRanks();
     this.#boardSet = new ClassicalSet(this.#board);
+    this.#boardSet.setFenString(FenPosition.parse(this.#startingFen).placement);
   }
 
   getPopulatedBoard() {
@@ -49,10 +55,22 @@ export default class ClassicalVariant {
       new StalemateValidator(game),
       new DeadPositionValidator(game),
       new ThreeFoldRepitionValidator(game),
+      new FiveFoldRepetitionValidator(game),
+      new SeventyFiveMoveValidator(game),
     ];
   }
 
   getVariantName() {
     return this.#variantName;
+  }
+
+  getStartingFen() {
+    return this.#startingFen;
+  }
+
+  setStartingFen(fen) {
+    const parsed = FenPosition.parse(fen);
+    this.#startingFen = fen;
+    this.#boardSet.setFenString(parsed.placement);
   }
 }

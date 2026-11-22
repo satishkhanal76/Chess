@@ -120,6 +120,15 @@ export class Piece {
     return this.#moved;
   }
 
+  getMovementState() {
+    return { moved: this.#moved, moves: [...this.#moves] };
+  }
+
+  restoreMovementState(state) {
+    this.#moved = state.moved;
+    this.#moves = [...state.moves];
+  }
+
   addMoves(move) {
     this.#moves.push(move);
   }

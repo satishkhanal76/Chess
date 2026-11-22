@@ -75,17 +75,21 @@ export default class GameOverModal {
   }
 
   #getDrawText(game) {
-    const overValidator = game.getGameOverValidator?.();
-
-    if (!overValidator) return "Draw!";
-
-    switch (overValidator.getType()) {
+    switch (game.getDrawReason()) {
       case GameValidator.TYPES.DRAW_BY_STALEMATE:
         return "Draw by stalemate!";
       case GameValidator.TYPES.DRAW_BY_DEADPOSITION:
         return "Draw by dead position!";
       case GameValidator.TYPES.DRAW_BY_REPITION:
         return "Draw by threefold repetition!";
+      case GameValidator.TYPES.DRAW_BY_FIVEFOLD_REPETITION:
+        return "Draw by fivefold repetition!";
+      case GameValidator.TYPES.DRAW_BY_FIFTY_MOVE:
+        return "Draw by the fifty-move rule!";
+      case GameValidator.TYPES.DRAW_BY_SEVENTY_FIVE_MOVE:
+        return "Draw by the seventy-five-move rule!";
+      case GameValidator.TYPES.DRAW_BY_AGREEMENT:
+        return "Draw by agreement!";
       default:
         return "Draw!";
     }

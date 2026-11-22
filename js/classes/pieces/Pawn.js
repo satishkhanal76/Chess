@@ -33,6 +33,14 @@ export class Pawn extends Piece {
 
     let availableMoves = super.getAvailableMoves(board);
 
+    const currentPosition = board.getPiecePosition(this);
+    const startingRow = this.getColour() === Piece.COLOUR.WHITE ? board.getRow() - 2 : 1;
+    if (currentPosition.getRow() !== startingRow) {
+      availableMoves = availableMoves.filter((move) =>
+        Math.abs(move.row - currentPosition.getRow()) < 2
+      );
+    }
+
     //if there is an opponent's piece at front then it's an invalid position
     availableMoves = this.validateTheMove(board, availableMoves);
 
@@ -75,6 +83,16 @@ export class Pawn extends Piece {
     return availableMoves;
   }
 
+  getAttackedMoves(board) {
+    const position = board.getPiecePosition(this);
+    const dimension = { col: board.getColumn(), row: board.getRow() };
+    const origin = { col: position.getCol(), row: position.getRow() };
+    const diagonals = this.getColour() === Piece.COLOUR.WHITE
+      ? [Movement.getOneDiagnolToTopLeft(dimension, origin), Movement.getOneDiagnolToTopRight(dimension, origin)]
+      : [Movement.getOneDiagnolToBottomLeft(dimension, origin), Movement.getOneDiagnolToBottomRight(dimension, origin)];
+    return diagonals.filter(Boolean).flat();
+  }
+
   validateTheMove(board, availableMoves) {
     for (let i = 0; i < availableMoves.length; i++) {
       let move = availableMoves[i];
@@ -113,5 +131,14 @@ export class Pawn extends Piece {
 
   getJumpedFileRank() {
     return this.#jumpedFileRank;
+  }
+
+  getMovementState() {
+    return { ...super.getMovementState(), jumpedFileRank: this.#jumpedFileRank };
+  }
+
+  restoreMovementState(state) {
+    super.restoreMovementState(state);
+    this.#jumpedFileRank = state.jumpedFileRank;
   }
 }

@@ -15,6 +15,8 @@ export default class OnlineGame  extends ClientGame{
     constructor(socket, roomId, variant) {
         super(variant);
 
+        this.getGameGUI().setOnlineMode(true);
+
         this.#socket = socket;
         this.#roomId = roomId;
 

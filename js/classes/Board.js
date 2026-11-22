@@ -3,6 +3,7 @@ import FileRankFactory from "./FileRankFactory.js";
 import MoveValidator from "./MoveValidators/MoveValidator.js";
 import { CommandHandler } from "./commands/CommandHandler.js";
 import { Piece } from "./pieces/Piece.js";
+import FenPosition from "./position/FenPosition.js";
 
 export class Board {
   static #NUM_OF_COLUMNS = 8;
@@ -17,6 +18,8 @@ export class Board {
 
 
   #moveValidator;
+  #castlingRights = "KQkq";
+  #enPassantTarget = null;
 
   constructor(col, row) {
     this.#createBoard(col, row);
@@ -49,29 +52,32 @@ export class Board {
   }
 
   getPositionAsString() {
-    let string = new String("");
-    for (let i = 0; i < this.#grid.length; i++) {
-      let emptySpaces = 0;
-      for (let j = 0; j < this.#grid[i].length; j++) {
-        if (this.#grid[j][i]) {
-          if (emptySpaces > 1) {
-            string = string.concat(emptySpaces);
-            emptySpaces = 0;
-          }
-          string = string.concat(this.#grid[j][i].getFenCharacter());
-        } else {
-          emptySpaces = emptySpaces + 1;
-        }
-      }
-      if (emptySpaces > 1) {
-        string = string.concat(emptySpaces);
-        emptySpaces = 0;
-      }
-      if (i < this.#grid.length - 1) {
-        string = string.concat("/");
-      }
-    }
-    return string;
+    return FenPosition.placementFromBoard(this);
+  }
+
+  setCastlingRights(rights = "") {
+    this.#castlingRights = rights;
+  }
+
+  getCastlingRights() {
+    return this.#castlingRights;
+  }
+
+  hasCastlingRight(colour, rookPosition) {
+    const file = rookPosition.getFile();
+    const rank = rookPosition.getRank();
+    const right = colour === Piece.COLOUR.WHITE
+      ? (file === "h" && rank === "1" ? "K" : file === "a" && rank === "1" ? "Q" : null)
+      : (file === "h" && rank === "8" ? "k" : file === "a" && rank === "8" ? "q" : null);
+    return Boolean(right && this.#castlingRights.includes(right));
+  }
+
+  setEnPassantTarget(target) {
+    this.#enPassantTarget = target;
+  }
+
+  getEnPassantTarget() {
+    return this.#enPassantTarget;
   }
 
   /**
@@ -193,6 +199,21 @@ export class Board {
     this.placePiece(toPiece, to);
 
     return willKingBeInCheck;
+  }
+
+  willEnPassantPutKingInCheck(from, to, capturedPawnPosition) {
+    const movingPiece = this.removePiece(from);
+    const destinationPiece = this.removePiece(to);
+    const capturedPawn = this.removePiece(capturedPawnPosition);
+    if (!movingPiece) return true;
+
+    this.placePiece(movingPiece, to);
+    const isKingInCheck = this.isKingInCheck(movingPiece.getColour());
+    this.removePiece(to);
+    this.placePiece(movingPiece, from);
+    this.placePiece(destinationPiece, to);
+    this.placePiece(capturedPawn, capturedPawnPosition);
+    return isKingInCheck;
   }
 
   /**
@@ -350,7 +371,7 @@ export class Board {
    */
   getAttackingPieces(piece) {
     let pieces = [];
-    let moves = piece.getAvailableMoves(this);
+    let moves = piece.getAttackedMoves?.(this) || piece.getAvailableMoves(this);
 
     for (let i = 0; i < moves.length; i++) {
       const move = moves[i];
@@ -389,7 +410,7 @@ export class Board {
 
     allEnemyPieces.forEach((piece) => {
       spotsUnderAttack = spotsUnderAttack.concat(
-        this.getValidMoves(piece)
+        piece.getAttackedMoves?.(this) || piece.getAvailableMoves(this)
       );
     });
 

@@ -1,5 +1,6 @@
 import { Command } from "./Command.js";
 import PieceAffect from "./PieceAffect.js";
+import { Piece } from "../pieces/Piece.js";
 
 export class PromotionCommand extends Command {
   #board;
@@ -33,6 +34,24 @@ export class PromotionCommand extends Command {
     if(!this.#movingPiece) {
       this.setIsValid(false);
       throw new Error(`No piece found at ${this.#from}`);
+    }
+
+    if (
+      this.#movingPiece.getType() !== Piece.TYPE.PAWN ||
+      this.#movingPiece.getPromotionRow() !== this.#to.getRow()
+    ) {
+      this.setIsValid(false);
+      throw new Error("A pawn can only promote on its final rank.");
+    }
+
+    const promotableTypes = [Piece.TYPE.QUEEN, Piece.TYPE.ROOK, Piece.TYPE.BISHOP, Piece.TYPE.KNIGHT];
+    if (
+      !this.#promotionPiece ||
+      !promotableTypes.includes(this.#promotionPiece.getType()) ||
+      this.#promotionPiece.getColour() !== this.#movingPiece.getColour()
+    ) {
+      this.setIsValid(false);
+      throw new Error("Promotion must select a queen, rook, bishop, or knight of the moving side.");
     }
 
     if (!this.#board.isValidMove(this.#from, this.#to)) {

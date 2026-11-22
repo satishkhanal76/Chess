@@ -58,8 +58,11 @@ ChessMultiplayer currently includes this repository as a Git submodule and impor
 ## Engine capabilities
 
 - Piece movement, legal move validation, check and checkmate
-- Stalemate, dead-position, and threefold-repetition validation
+- Stalemate, dead-position, claimable threefold/50-move draws, automatic fivefold/75-move draws
 - Castling, en passant, promotion, move history, undo and redo
+- Full six-field FEN import/export and SAN/PGN import/export
+- Optional increment clocks, draw offers, draw claims, resignation, and timeout results
+- A separate depth-limited material-search opponent for local games
 - Classical Chess, Two Queen, and FourOFour variants
 - Extensible board sets, pieces, move commands, and game validators
 

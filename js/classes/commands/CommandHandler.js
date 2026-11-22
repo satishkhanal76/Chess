@@ -20,7 +20,8 @@ export class CommandHandler {
     if (!(command instanceof Command)) return null;
 
     if (this.#commandIndex !== this.#currentCommandIndex) {
-      this.executeCommands();
+      this.#commands.splice(this.#currentCommandIndex + 1);
+      this.#commandIndex = this.#currentCommandIndex;
     }
 
     this.#commands.push(command);
@@ -136,7 +137,6 @@ export class CommandHandler {
       return null;
     }
     const command = this.#commands[this.#currentCommandIndex];
-    command.undo();
     if (command.isExecuted()) {
       command.redo();
     } else {

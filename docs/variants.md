@@ -50,7 +50,10 @@ Classic games use the standard set of game-ending validators:
 - Checkmate
 - Stalemate
 - Dead position
-- Threefold repetition
+- Claimable threefold repetition
+- Claimable 50-move draw
+- Automatic fivefold repetition
+- Automatic 75-move draw
 
 ## Pieces
 

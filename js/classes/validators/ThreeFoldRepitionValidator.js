@@ -1,26 +1,16 @@
 import GameValidator from "./GameValidator.js";
 
 export default class ThreeFoldRepitionValidator extends GameValidator {
-  #gamePositions;
   constructor(game) {
     super(GameValidator.TYPES.DRAW_BY_REPITION, game);
-
-    this.#gamePositions = [];
-  }
-
-  onPieceMove(command) {
-    const currentPosition = this.getGame().getBoard().getPositionAsString();
-    this.#gamePositions.push(currentPosition);
   }
 
   validate() {
-    const currentPosition = this.#gamePositions[this.#gamePositions.length - 1];
-    const occurrences = this.#gamePositions.filter(
-      (pos) => pos.localeCompare(currentPosition) === 0
-    );
+    this.setIsOver(false);
+  }
 
-    if (occurrences.length >= 3) {
-      this.setIsOver(true);
-    }
+  isClaimable() {
+    const game = this.getGame();
+    return game.getPositionHistory().count(game.getPositionKey()) >= 3;
   }
 }

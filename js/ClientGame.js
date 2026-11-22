@@ -28,6 +28,7 @@ export default class ClientGame {
     addPlayers() {
         this.#game.addPlayer(new Player(Piece.COLOUR.WHITE));
         this.#game.addPlayer(new Player(Piece.COLOUR.BLACK));
+        this.#gameGUI.refreshControls();
     }
 
 

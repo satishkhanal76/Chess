@@ -69,7 +69,7 @@ export class CastleCommand extends Command {
     this.#board.movePiece(this.#rook, this.#rookNewPosition);
     
     this.#king.moved(this.#kingPosition, this.#kingNewPosition);
-    this.#king.moved(this.#rookPosition, this.#rookNewPosition);
+    this.#rook.moved(this.#rookPosition, this.#rookNewPosition);
     
     this.getPiecesAffected().push(new PieceAffect(this.#king, PieceAffect.AFFECT_TYPES.MOVE, this.#kingPosition, this.#kingNewPosition));
     this.getPiecesAffected().push(new PieceAffect(this.#rook, PieceAffect.AFFECT_TYPES.MOVE, this.#rookPosition, this.#rookNewPosition));
@@ -84,22 +84,26 @@ export class CastleCommand extends Command {
   rooksThatCanLegallyCastle() {
 
     //if the king has moved or is in check(no legal castles)
-    if (this.#king.hasMoved() || this.#board.isPieceUnderAttack(this.#king)) return [];
+    if (this.#board.isPieceUnderAttack(this.#king)) return [];
 
     let rooks = this.#board.getPiecesByTypeAndColour(Piece.TYPE.ROOK, this.#king.getColour());
     let legalRooks = [];
 
     for (let i = 0; i < rooks.length; i++) {
       const rook = rooks[i];
-      if (rook.hasMoved()) continue;
+      const rookPosition = this.#board.getPiecePosition(rook);
+      if (!this.#board.hasCastlingRight(this.#king.getColour(), rookPosition)) continue;
 
       const pathToKing = rook.pathToKing(this.#board);
       if (!pathToKing) continue;
 
       let spotsUnderAttackByEnemy = this.#board.getSpotsUnderAttack(this.#king.getColour());
+      const kingPosition = this.#board.getPiecePosition(this.#king);
+      const isKingSide = rookPosition.getCol() > kingPosition.getCol();
+      const kingPath = isKingSide ? pathToKing : pathToKing.slice(1);
 
       let spotUnderAttack = false;
-      pathToKing.forEach((spot) => {
+      kingPath.forEach((spot) => {
         let onSpot = spotsUnderAttackByEnemy.filter(
           (move) => spot.col == move.col && spot.row == move.row
         );

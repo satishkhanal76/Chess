@@ -282,6 +282,12 @@ main > h1 { margin: 0; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.05em
 button { padding: .72rem 1rem; border-radius: .65rem; background: var(--app-accent); color: #211811; font: inherit; font-weight: 700; transition: transform .18s ease, filter .18s ease; }
 button:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
 button:disabled { background: #414141; color: var(--app-muted); }
+.game-actions { display: grid; gap: .75rem; margin: 1rem auto 0; width: min(100%, 900px); color: var(--app-text); }
+.game-clocks, .game-action-buttons { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .65rem; }
+.game-clock { display: flex; align-items: center; gap: .75rem; min-width: 8.5rem; padding: .55rem .8rem; border: 1px solid var(--app-line); border-radius: .7rem; background: var(--app-panel); color: var(--app-muted); }
+.game-clock strong { color: var(--app-text); font-variant-numeric: tabular-nums; }
+.game-clock.active { border-color: var(--app-accent); color: var(--app-accent); }
+.game-action-buttons select { min-height: 2.8rem; padding: .5rem .7rem; border: 1px solid var(--app-line); border-radius: .65rem; background: var(--app-panel); color: var(--app-text); font: inherit; }
 .layout-split { flex-direction: row; align-items: flex-start; gap: 1.25rem; }
 .game-container { padding: .8rem; border: 1px solid var(--app-line); border-radius: 1rem; background: var(--app-panel); box-shadow: 0 20px 55px rgba(0,0,0,.26); }
 .player-display { margin-inline-start: .3rem; color: var(--app-text); font-size: .95rem; }
