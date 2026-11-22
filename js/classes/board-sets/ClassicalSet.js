@@ -1,9 +1,8 @@
-import FileRankFactory from "../FileRankFactory.js";
-import { PieceFactory } from "../pieces/PieceFactory.js";
+import FileRankFactory from '../FileRankFactory.js';
+import { PieceFactory } from '../pieces/PieceFactory.js';
 
 export default class ClassicalSet {
   #FEN_STRING = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-
   #board;
   constructor(board) {
     this.#board = board;
@@ -11,7 +10,7 @@ export default class ClassicalSet {
 
   populateBoard() {
     //extract all the rows into an array
-    const ranks = this.#FEN_STRING.split("/");
+    const ranks = this.#FEN_STRING.split('/');
 
     //for each row of the fen string
     for (let i = 0; i < ranks.length; i++) {
@@ -28,11 +27,12 @@ export default class ClassicalSet {
         //get the character for each column
         const character = rank.charAt(j);
 
-        //check to see if the character is a number, if it is we need to skip that many rows
-        const numberOfSkips = parseInt(character);
-
-        if (!isNaN(numberOfSkips)) {
-          col = col + numberOfSkips;
+        // A run of digits encodes the number of consecutive empty squares.
+        if (/\d/.test(character)) {
+          let end = j + 1;
+          while (end < rank.length && /\d/.test(rank[end])) end += 1;
+          col += Number(rank.slice(j, end));
+          j = end - 1;
           continue;
         }
 

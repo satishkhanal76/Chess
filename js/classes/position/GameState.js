@@ -3,12 +3,15 @@ import FileRankFactory from "../FileRankFactory.js";
 import { Piece } from "../pieces/Piece.js";
 
 export default class GameState {
-  constructor(fen = INITIAL_FEN) {
+  #dimensions;
+
+  constructor(fen = INITIAL_FEN, dimensions = {}) {
+    this.#dimensions = dimensions;
     this.loadFen(fen);
   }
 
   loadFen(fen) {
-    Object.assign(this, FenPosition.parse(fen));
+    Object.assign(this, FenPosition.parse(fen, this.#dimensions));
   }
 
   snapshot() {
@@ -28,12 +31,19 @@ export default class GameState {
 
   applyToBoard(board) {
     const rights = [
-      ["K", "e1", "h1"], ["Q", "e1", "a1"],
-      ["k", "e8", "h8"], ["q", "e8", "a8"],
-    ].filter(([right, kingSquare, rookSquare]) => {
+      ["K", Piece.COLOUR.WHITE, true], ["Q", Piece.COLOUR.WHITE, false],
+      ["k", Piece.COLOUR.BLACK, true], ["q", Piece.COLOUR.BLACK, false],
+    ].filter(([right, colour, kingSide]) => {
       if (!this.castlingRights.includes(right)) return false;
-      return board.getPiece(FileRankFactory.getFileRank(kingSquare))?.getType() === Piece.TYPE.KING &&
-        board.getPiece(FileRankFactory.getFileRank(rookSquare))?.getType() === Piece.TYPE.ROOK;
+      const king = board.getKingByColour(colour);
+      const kingPosition = king && board.getPiecePosition(king);
+      const homeRow = colour === Piece.COLOUR.WHITE ? board.getRow() - 1 : 0;
+      if (!kingPosition || kingPosition.getRow() !== homeRow) return false;
+      return board.getPiecesByTypeAndColour(Piece.TYPE.ROOK, colour).some((rook) => {
+        const rookPosition = board.getPiecePosition(rook);
+        return rookPosition.getRow() === homeRow &&
+          (rookPosition.getCol() > kingPosition.getCol()) === kingSide;
+      });
     }).map(([right]) => right).join("");
     this.castlingRights = rights;
     board.setCastlingRights(rights);
@@ -51,13 +61,13 @@ export default class GameState {
     if (movingPiece.getType() === Piece.TYPE.KING) {
       this.removeCastlingRights(colour === "w" ? "KQ" : "kq");
     } else if (movingPiece.getType() === Piece.TYPE.ROOK) {
-      this.removeRookRight(from, colour);
+      this.removeRookRight(from, colour, board);
     }
 
     if (capturedPiece?.getType() === Piece.TYPE.ROOK) {
       const capturedAt = command.getTakingPiecePosition?.() || to;
       const capturedColour = capturedPiece.getColour() === Piece.COLOUR.WHITE ? "w" : "b";
-      this.removeRookRight(capturedAt, capturedColour);
+      this.removeRookRight(capturedAt, capturedColour, board);
     }
 
     if (movingPiece.getType() === Piece.TYPE.PAWN) {
@@ -82,16 +92,13 @@ export default class GameState {
     this.castlingRights = [...this.castlingRights].filter((right) => !rights.includes(right)).join("");
   }
 
-  removeRookRight(position, colour) {
+  removeRookRight(position, colour, board) {
     if (!position) return;
-    const square = position.getFileRank();
-    const rightsBySquare = {
-      a1: "Q", h1: "K", a8: "q", h8: "k",
-    };
-    const right = rightsBySquare[square];
-    if (right && (colour === "w" ? right === "Q" || right === "K" : right === "q" || right === "k")) {
-      this.removeCastlingRights(right);
-    }
+    const king = board.getKingByColour(colour === "w" ? Piece.COLOUR.WHITE : Piece.COLOUR.BLACK);
+    const kingPosition = king && board.getPiecePosition(king);
+    if (!kingPosition || kingPosition.getRow() !== position.getRow()) return;
+    const right = position.getCol() > kingPosition.getCol() ? "K" : "Q";
+    this.removeCastlingRights(colour === "w" ? right : right.toLowerCase());
   }
 
   getFen(board) {

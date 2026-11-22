@@ -9,6 +9,7 @@ export { PieceFactory, PIECE_DATA } from "../js/classes/pieces/PieceFactory.js";
 export { default as ClassicalVariant } from "../js/classes/variants/ClassicalVariant.js";
 export { default as TwoQueenVariant } from "../js/classes/variants/TwoQueenVariant.js";
 export { default as FourOFourVariant } from "../js/classes/variants/FourOFourVariant.js";
+export { default as VariantFactory } from "../js/classes/variants/VariantFactory.js";
 export { default as ClassicalSet } from "../js/classes/board-sets/ClassicalSet.js";
 export { default as CustomSet } from "../js/classes/board-sets/CustomSet.js";
 export { default as GameValidator } from "../js/classes/validators/GameValidator.js";

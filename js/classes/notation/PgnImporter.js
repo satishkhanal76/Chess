@@ -72,10 +72,15 @@ export default class PgnImporter {
     const promotionMatch = san.match(/=([QRBN])$/);
     const promotionType = promotionMatch ? PIECE_TYPES[promotionMatch[1]] : undefined;
     const withoutPromotion = san.replace(/=[QRBN]$/, "");
-    const destinationMatch = withoutPromotion.match(/([a-h][1-8])$/);
+    const destinationMatch = withoutPromotion.match(/([a-z][1-9])$/);
     if (!destinationMatch) throw new Error(`Invalid PGN move: ${source}`);
 
     const destination = destinationMatch[1];
+    const targetFile = destination.charCodeAt(0) - 97;
+    const targetRank = Number(destination[1]);
+    if (targetFile >= game.getBoard().getColumn() || targetRank > game.getBoard().getRow()) {
+      throw new Error(`PGN move is outside the board: ${source}`);
+    }
     const prefix = withoutPromotion.slice(0, -destination.length);
     const pieceLetter = /^[KQRBN]/.test(prefix) ? prefix[0] : "";
     const pieceType = pieceLetter ? PIECE_TYPES[pieceLetter] : Piece.TYPE.PAWN;

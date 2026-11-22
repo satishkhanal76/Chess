@@ -1,7 +1,4 @@
-import { Game } from "./classes/Game.js";
-import ClassicalVariant from "./classes/variants/ClassicalVariant.js";
-import FourOFourVariant from "./classes/variants/FourOFourVariant.js";
-import TwoQueenVariant from "./classes/variants/TwoQueenVariant.js";
+import VariantFactory from "./classes/variants/VariantFactory.js";
 import LocalGame from "./LocalGame.js";
 import OnlineGame from "./OnlineGame.js";
 
@@ -27,6 +24,7 @@ export default class Client{
     }
 
     setupGame(options = {}) {
+        this.#clientGame?.dispose?.();
         if (typeof options === "string") this.#gameVariant = options;
         const { settings = {} } = typeof options === "object" ? options : {};
         switch(this.#gameType) {
@@ -43,17 +41,7 @@ export default class Client{
     }
 
     static getGameVariantObject(variant) {
-        switch(variant) {
-            case "two-queen":
-                return new TwoQueenVariant("two-queen");
-                break;
-            case "404-variant":
-                return new FourOFourVariant("404-variant");
-                break;
-            default:
-                return new ClassicalVariant("classical");
-                break;
-        }
+        return VariantFactory.create(variant);
     }
 
     setSocket(socket) {

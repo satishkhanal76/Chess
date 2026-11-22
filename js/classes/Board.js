@@ -64,11 +64,14 @@ export class Board {
   }
 
   hasCastlingRight(colour, rookPosition) {
-    const file = rookPosition.getFile();
-    const rank = rookPosition.getRank();
+    const king = this.getKingByColour(colour);
+    const kingPosition = king && this.getPiecePosition(king);
+    const homeRow = colour === Piece.COLOUR.WHITE ? this.getRow() - 1 : 0;
+    if (!kingPosition || kingPosition.getRow() !== homeRow || rookPosition.getRow() !== homeRow) return false;
+    const isKingSide = rookPosition.getCol() > kingPosition.getCol();
     const right = colour === Piece.COLOUR.WHITE
-      ? (file === "h" && rank === "1" ? "K" : file === "a" && rank === "1" ? "Q" : null)
-      : (file === "h" && rank === "8" ? "k" : file === "a" && rank === "8" ? "q" : null);
+      ? (isKingSide ? "K" : "Q")
+      : (isKingSide ? "k" : "q");
     return Boolean(right && this.#castlingRights.includes(right));
   }
 

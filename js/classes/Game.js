@@ -46,12 +46,17 @@ export class Game {
 
   constructor(variant, fen = undefined) {
     this.#variant = variant || new ClassicalVariant();
+    const variantBoard = this.#variant.getBoard();
+    const dimensions = {
+      rows: variantBoard.getRow(),
+      columns: variantBoard.getColumn(),
+    };
     if (fen) this.#variant.setStartingFen?.(fen);
     const isClassical = !this.#variant.getVariantName || this.#variant.getVariantName() === "classical";
     const defaultFen = isClassical
       ? (this.#variant.getStartingFen?.() || INITIAL_FEN)
-      : "8/8/8/8/8/8/8/8 w - - 0 1";
-    this.#gameState = new GameState(fen || defaultFen);
+      : `${Array(dimensions.rows).fill(dimensions.columns).join("/")} w ${this.#variant.getStartingCastlingRights?.() || "-"} - 0 1`;
+    this.#gameState = new GameState(fen || defaultFen, dimensions);
     this.#positionHistory = new PositionHistory();
     this.#turnHandler = new TurnHandler();
     this.#moveEventListeners = new Listeners();
@@ -272,6 +277,17 @@ export class Game {
 
   getCurrentPlayer() {
     return this.#turnHandler.getCurrentPlayer();
+  }
+
+  getVariant() {
+    return this.#variant;
+  }
+
+  createCopy() {
+    if (typeof this.#variant.createCopy !== "function") {
+      throw new Error(`Variant '${this.#variant.getVariantName?.() || "unknown"}' cannot be copied for search.`);
+    }
+    return new Game(this.#variant.createCopy(), this.getFen());
   }
 
   getFen() {

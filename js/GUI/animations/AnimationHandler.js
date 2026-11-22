@@ -18,6 +18,8 @@ export default class AnimationHandler {
   #activeAnimation = null;
   #queue = []; // Animation queue
   #isAnimating = false;
+  #idlePromise = Promise.resolve();
+  #resolveIdle = null;
 
   constructor(gameGUI) {
     this.#gameGUI = gameGUI;
@@ -33,6 +35,9 @@ export default class AnimationHandler {
 
     // Start processing the queue if not already animating
     if (!this.#isAnimating) {
+      this.#idlePromise = new Promise((resolve) => {
+        this.#resolveIdle = resolve;
+      });
       this.#processQueue();
     }
 
@@ -54,12 +59,21 @@ export default class AnimationHandler {
 
   async #processQueue() {
     this.#isAnimating = true;
-    while (this.#queue.length > 0) {
-      const nextAnimation = this.#queue.shift();
-      await nextAnimation();
+    try {
+      while (this.#queue.length > 0) {
+        const nextAnimation = this.#queue.shift();
+        await nextAnimation();
+      }
+      this.#gameGUI.syncBoardAfterAnimations();
+    } finally {
+      this.#isAnimating = false;
+      this.#resolveIdle?.();
+      this.#resolveIdle = null;
     }
-    this.#gameGUI.syncBoardAfterAnimations();
-    this.#isAnimating = false;
+  }
+
+  waitForIdle() {
+    return this.#idlePromise;
   }
 
   getActiveAnimation() {

@@ -26,7 +26,7 @@ export default class ClassicalVariant {
     this.setBoard(new Board(8, 8));
     FileRankFactory.resetFileRanks();
     this.#boardSet = new ClassicalSet(this.#board);
-    this.#boardSet.setFenString(FenPosition.parse(this.#startingFen).placement);
+    this.#boardSet.setFenString(FenPosition.parse(this.#startingFen, this.getBoardDimensions()).placement);
   }
 
   getPopulatedBoard() {
@@ -68,8 +68,20 @@ export default class ClassicalVariant {
     return this.#startingFen;
   }
 
+  getBoardDimensions() {
+    return { rows: this.#board.getRow(), columns: this.#board.getColumn() };
+  }
+
+  getStartingCastlingRights() {
+    return this.#variantName === "classical" ? "KQkq" : "-";
+  }
+
+  createCopy() {
+    return new this.constructor(this.#variantName, this.#startingFen);
+  }
+
   setStartingFen(fen) {
-    const parsed = FenPosition.parse(fen);
+    const parsed = FenPosition.parse(fen, this.getBoardDimensions());
     this.#startingFen = fen;
     this.#boardSet.setFenString(parsed.placement);
   }

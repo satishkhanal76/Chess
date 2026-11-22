@@ -19,6 +19,10 @@ export default class TwoQueenVariant extends ClassicalVariant {
     );
   }
 
+  getStartingCastlingRights() {
+    return "KQkq";
+  }
+
   //   getPopulatedBoard() {
   //     this.#boardSet.populateBoard();
   //     return this.#board;

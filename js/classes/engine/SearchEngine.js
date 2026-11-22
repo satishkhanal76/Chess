@@ -1,4 +1,3 @@
-import { Game } from "../Game.js";
 import Move from "../Move.js";
 import FileRankFactory from "../FileRankFactory.js";
 import { Piece } from "../pieces/Piece.js";
@@ -81,7 +80,7 @@ export default class SearchEngine {
   }
 
   #playOnCopy(game, move) {
-    const copy = new Game(undefined, game.getFen());
+    const copy = game.createCopy();
     copy.addPlayer({ getColour: () => Piece.COLOUR.WHITE });
     copy.addPlayer({ getColour: () => Piece.COLOUR.BLACK });
     const from = FileRankFactory.getFileRank(move.getFrom().getFileRank());
