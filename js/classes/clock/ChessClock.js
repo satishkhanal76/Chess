@@ -67,6 +67,37 @@ export default class ChessClock {
     this.#onFlag = typeof callback === "function" ? callback : () => {};
   }
 
+  applyServerSnapshot({ white, black, activeColour }, elapsedMs = 0) {
+    if (!Number.isFinite(white) || !Number.isFinite(black)) return false;
+    if (activeColour !== null && activeColour !== "white" && activeColour !== "black") return false;
+
+    this.#clearTimer();
+    this.#startedAt = null;
+    this.#activeColour = null;
+    this.#remaining = {
+      white: Math.max(0, white),
+      black: Math.max(0, black),
+    };
+
+    if (activeColour) {
+      this.#remaining[activeColour] = Math.max(
+        0,
+        this.#remaining[activeColour] - Math.max(0, elapsedMs)
+      );
+      this.#activate(activeColour);
+    } else {
+      this.#emit();
+    }
+    return true;
+  }
+
+  refresh() {
+    if (this.#startedAt === null || !this.#activeColour) return;
+    const colour = this.#activeColour;
+    if (this.getRemaining(colour) <= 0) this.#flag(colour);
+    else this.#emit();
+  }
+
   subscribe(listener) {
     this.#listeners.add(listener);
     return () => this.#listeners.delete(listener);

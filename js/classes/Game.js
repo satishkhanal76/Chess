@@ -100,6 +100,7 @@ export class Game {
   }
 
   movePiece(requestedMove) {
+    this.#clock?.refresh?.();
     if (this.#isOver) throw new Error("The game is already over.");
     // Check to see if the piece exists
     const fromPiece = this.#board.getPiece(requestedMove.getFrom());
@@ -389,7 +390,7 @@ export class Game {
   }
 
   offerDraw(colour = this.#turnHandler.getCurrentPlayer()?.getColour()) {
-    if (this.#isOver || colour !== this.#turnHandler.getCurrentPlayer()?.getColour()) return false;
+    if (this.#isOver || this.#drawOffer || !this.#turnHandler.getPlayers().some((player) => player.getColour() === colour)) return false;
     this.#drawOffer = colour;
     return true;
   }
@@ -410,13 +411,28 @@ export class Game {
     return this.#drawOffer;
   }
 
-  resign(colour = this.#turnHandler.getCurrentPlayer()?.getColour()) {
+  resign(colour = this.#turnHandler.getCurrentPlayer()?.getColour(), reason = "resignation") {
     if (this.#isOver || !colour) return false;
     const opponent = this.#turnHandler.getPlayers().find((player) => player.getColour() !== colour);
+    if (!this.#turnHandler.getPlayers().some((player) => player.getColour() === colour)) return false;
     this.#winner = opponent || null;
     this.#isOver = true;
     this.#isInProgress = false;
-    this.#result = { type: "resignation", winner: opponent?.getColour() || null };
+    this.#result = { type: "resignation", winner: opponent?.getColour() || null, reason };
+    this.#clock?.stop?.();
+    this.#resultEventListeners.emit(this.#result);
+    return true;
+  }
+
+  applyRemoteResult(result) {
+    if (this.#isOver || !result || typeof result.type !== "string") return false;
+    const winner = result.winner ? this.#turnHandler.getPlayer(result.winner) : null;
+    if (result.winner && !winner) return false;
+    this.#winner = winner;
+    this.#drawReason = result.reason || null;
+    this.#result = { ...result };
+    this.#isOver = true;
+    this.#isInProgress = false;
     this.#clock?.stop?.();
     this.#resultEventListeners.emit(this.#result);
     return true;
@@ -439,10 +455,10 @@ export class Game {
     return true;
   }
 
-  setClock(clock) {
+  setClock(clock, onFlag = (colour) => this.flagFall(colour.toUpperCase())) {
     this.#clock?.stop?.();
     this.#clock = clock;
-    this.#clock?.setOnFlag?.((colour) => this.flagFall(colour.toUpperCase()));
+    this.#clock?.setOnFlag?.(onFlag);
     return this.#clock;
   }
 

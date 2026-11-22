@@ -15,6 +15,18 @@ export default class Socket {
         GAME_CREATED: "gameCreated",
         GAME_STARTED: "gameStarted",
         MOVE_PIECE: "movePiece",
-        MOVE_INVALID: "moveInvalid"
+        MOVE_INVALID: "moveInvalid",
+        OFFER_DRAW: "offerDraw",
+        ACCEPT_DRAW: "acceptDraw",
+        DECLINE_DRAW: "declineDraw",
+        CLAIM_DRAW: "claimDraw",
+        RESIGN: "resign",
+        DRAW_OFFERED: "drawOffered",
+        DRAW_OFFER_CLEARED: "drawOfferCleared",
+        GAME_RESULT: "gameResult",
+        GAME_ACTION_REJECTED: "gameActionRejected",
+        CLOCK_SYNC: "clockSync",
+        CLOCK_PING: "clockPing",
+        CLOCK_PONG: "clockPong"
     }
 }

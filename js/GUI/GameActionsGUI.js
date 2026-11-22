@@ -1,17 +1,20 @@
-import { Piece } from "../classes/pieces/Piece.js";
-
 export default class GameActionsGUI {
   #game;
   #root;
-  #clockRow;
   #pauseButton;
   #whiteClock;
   #blackClock;
   #drawButton;
+  #declineDrawButton;
   #claimButton;
   #resignButton;
   #gameStarted = false;
   #isOnline = false;
+  #onlinePlayerColour = null;
+  #onlineDrawOffer = null;
+  #onlineActionHandlers = {};
+  #clockSubscription = null;
+  #subscribedClock = null;
 
   constructor(game) {
     this.#game = game;
@@ -23,31 +26,29 @@ export default class GameActionsGUI {
   }
 
   #createControls() {
-    this.#clockRow = document.createElement("div");
-    this.#clockRow.className = "game-clocks";
     this.#whiteClock = this.#makeClock("White");
     this.#blackClock = this.#makeClock("Black");
-    this.#clockRow.append(this.#whiteClock.root, this.#blackClock.root);
+    this.setBoardOrientation("WHITE");
 
     const actions = document.createElement("div");
     actions.className = "game-action-buttons";
     this.#pauseButton = this.#makeButton("Pause clock");
     this.#drawButton = this.#makeButton("Offer draw");
+    this.#declineDrawButton = this.#makeButton("Decline draw");
     this.#claimButton = this.#makeButton("Claim draw");
     this.#resignButton = this.#makeButton("Resign");
-    actions.append(this.#pauseButton, this.#drawButton, this.#claimButton, this.#resignButton);
-    this.#root.replaceChildren(this.#clockRow, actions);
+    actions.append(this.#pauseButton, this.#drawButton, this.#declineDrawButton, this.#claimButton, this.#resignButton);
+    this.#root.replaceChildren(actions);
     this.#root.hidden = true;
   }
 
   #makeClock(label) {
     const root = document.createElement("div");
     root.className = "game-clock";
-    const name = document.createElement("span");
-    name.textContent = label;
+    root.setAttribute("aria-label", `${label} clock`);
     const value = document.createElement("strong");
     value.textContent = "00:00";
-    root.append(name, value);
+    root.append(value);
     return { root, value };
   }
 
@@ -67,13 +68,16 @@ export default class GameActionsGUI {
       this.update();
     });
     this.#drawButton.addEventListener("click", () => this.#handleDrawOffer());
+    this.#declineDrawButton.addEventListener("click", () => this.#onlineActionHandlers.declineDraw?.());
     this.#claimButton.addEventListener("click", () => {
-      this.#game.claimDraw(this.#game.getCurrentPlayer()?.getColour());
+      if (this.#isOnline) this.#onlineActionHandlers.claimDraw?.();
+      else this.#game.claimDraw(this.#game.getCurrentPlayer()?.getColour());
       this.update();
     });
     this.#resignButton.addEventListener("click", () => {
       if (window.confirm("Resign this game?")) {
-        this.#game.resign(this.#game.getCurrentPlayer()?.getColour());
+        if (this.#isOnline) this.#onlineActionHandlers.resign?.();
+        else this.#game.resign(this.#game.getCurrentPlayer()?.getColour());
         this.update();
       }
     });
@@ -82,6 +86,11 @@ export default class GameActionsGUI {
   }
 
   #handleDrawOffer() {
+    if (this.#isOnline) {
+      if (!this.#onlineDrawOffer) this.#onlineActionHandlers.offerDraw?.();
+      else if (this.#onlineDrawOffer !== this.#onlinePlayerColour) this.#onlineActionHandlers.acceptDraw?.();
+      return;
+    }
     const currentColour = this.#game.getCurrentPlayer()?.getColour();
     const offeredBy = this.#game.getDrawOffer();
     if (!offeredBy) this.#game.offerDraw(currentColour);
@@ -107,9 +116,11 @@ export default class GameActionsGUI {
     const clock = this.#game.getClock();
     const currentColour = this.#game.getCurrentPlayer()?.getColour();
     const offer = this.#game.getDrawOffer();
+    this.#syncClockSubscription(clock);
     this.#root.hidden = !this.#gameStarted;
-    this.#clockRow.hidden = !clock;
     this.#pauseButton.hidden = !clock || this.#isOnline;
+    this.#whiteClock.root.hidden = !clock;
+    this.#blackClock.root.hidden = !clock;
 
     if (clock) {
       const state = clock.getState();
@@ -120,19 +131,65 @@ export default class GameActionsGUI {
       this.#pauseButton.textContent = state.activeColour ? "Pause clock" : "Resume clock";
     }
 
-    this.#drawButton.textContent = !offer
+    const visibleOffer = this.#isOnline ? this.#onlineDrawOffer : offer;
+    this.#drawButton.textContent = !visibleOffer
       ? "Offer draw"
-      : offer === currentColour
+      : visibleOffer === (this.#isOnline ? this.#onlinePlayerColour : currentColour)
         ? "Draw offered"
         : "Accept draw";
-    this.#drawButton.disabled = gameOver || (offer && offer === currentColour) || this.#isOnline;
-    this.#claimButton.disabled = gameOver || !this.#game.canClaimDraw() || this.#isOnline;
-    this.#resignButton.disabled = gameOver || !currentColour || this.#isOnline;
+    this.#drawButton.disabled = gameOver || (visibleOffer && visibleOffer === (this.#isOnline ? this.#onlinePlayerColour : currentColour));
+    this.#declineDrawButton.hidden = !this.#isOnline || !visibleOffer || visibleOffer === this.#onlinePlayerColour;
+    this.#declineDrawButton.disabled = gameOver || this.#declineDrawButton.hidden;
+    this.#claimButton.disabled = gameOver || !this.#game.canClaimDraw() || (this.#isOnline && currentColour !== this.#onlinePlayerColour);
+    this.#resignButton.disabled = gameOver || (this.#isOnline ? !this.#onlinePlayerColour : !currentColour);
     this.#pauseButton.disabled = gameOver || !clock;
+  }
+
+  #syncClockSubscription(clock) {
+    if (clock === this.#subscribedClock) return;
+    this.#clockSubscription?.();
+    this.#clockSubscription = null;
+    this.#subscribedClock = clock;
+    if (clock) {
+      this.#clockSubscription = clock.subscribe((state) => this.#renderClockState(state));
+      this.#renderClockState(clock.getState());
+    }
+  }
+
+  #renderClockState(state) {
+    this.#whiteClock.value.textContent = this.#formatTime(state.white);
+    this.#blackClock.value.textContent = this.#formatTime(state.black);
+    this.#whiteClock.root.classList.toggle("active", state.activeColour === "white");
+    this.#blackClock.root.classList.toggle("active", state.activeColour === "black");
   }
 
   setOnlineMode(isOnline) {
     this.#isOnline = Boolean(isOnline);
+    this.update();
+  }
+
+  setBoardOrientation(bottomColour) {
+    const topSlot = document.getElementById("top-player-clock");
+    const bottomSlot = document.getElementById("bottom-player-clock");
+    if (!topSlot || !bottomSlot || !this.#whiteClock || !this.#blackClock) return;
+    const bottomClock = bottomColour === "BLACK" ? this.#blackClock : this.#whiteClock;
+    const topClock = bottomColour === "BLACK" ? this.#whiteClock : this.#blackClock;
+    topSlot.replaceChildren(topClock.root);
+    bottomSlot.replaceChildren(bottomClock.root);
+  }
+
+  setOnlineActionHandlers(handlers = {}) {
+    this.#onlineActionHandlers = handlers;
+    this.update();
+  }
+
+  setOnlinePlayerColour(colour) {
+    this.#onlinePlayerColour = colour;
+    this.update();
+  }
+
+  setOnlineDrawOffer(colour) {
+    this.#onlineDrawOffer = colour || null;
     this.update();
   }
 }

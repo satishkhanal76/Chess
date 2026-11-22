@@ -105,7 +105,9 @@ export default class GameOverModal {
         return "The side to move was in check and had no legal moves.";
       case "resignation": {
         const loser = result.winner === "WHITE" ? "Black" : "White";
-        return `${loser} resigned.`;
+        return result.reason === "disconnect"
+          ? `${loser} disconnected and forfeited by resignation.`
+          : `${loser} resigned.`;
       }
       case "timeout": {
         const loser = result.winner === "WHITE" ? "Black" : "White";

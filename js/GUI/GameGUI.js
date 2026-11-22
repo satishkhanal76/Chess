@@ -22,6 +22,7 @@ export default class GameGUI {
   #timelinePositions = [];
   #timelineIndex = 0;
   #gameStarted = false;
+  #isOnline = false;
   #canOnlyColourMove; //keeps track if only one colour can move
 
   constructor(game) {
@@ -156,6 +157,11 @@ export default class GameGUI {
   // Called by board gui when the user wants to make a move
   makeMove(move) {
     if (!this.#gameStarted) return;
+    if (this.#isOnline) {
+      const clock = this.#game.getClock();
+      const currentColour = this.#game.getCurrentPlayer()?.getColour()?.toLowerCase();
+      if (clock && currentColour && clock.getState()[currentColour] <= 0) return;
+    }
     if (this.#timelineIndex < this.#timelineCommands.length) {
       this.setStatus("Return to the latest move before playing.");
       return;
@@ -204,10 +210,24 @@ export default class GameGUI {
   setBoardOrientation(bottomColour) {
     this.#boardSideDisplayGUI.setBoardOrientation(bottomColour);
     this.#boardGUI.flipBoard();
+    this.#gameActionsGUI.setBoardOrientation(bottomColour);
   }
 
   setOnlineMode(isOnline) {
+    this.#isOnline = Boolean(isOnline);
     this.#gameActionsGUI.setOnlineMode(isOnline);
+  }
+
+  setOnlineActionHandlers(handlers) {
+    this.#gameActionsGUI.setOnlineActionHandlers(handlers);
+  }
+
+  setOnlinePlayerColour(colour) {
+    this.#gameActionsGUI.setOnlinePlayerColour(colour);
+  }
+
+  setOnlineDrawOffer(colour) {
+    this.#gameActionsGUI.setOnlineDrawOffer(colour);
   }
 
   refreshControls() {

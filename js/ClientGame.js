@@ -51,9 +51,9 @@ export default class ClientGame {
         return this.#gameGUI;
     }
 
-    startGame({ timeControl = "none" } = {}) {
+    startGame({ timeControl = "none", onClockFlag } = {}) {
         const clock = createClockForTimeControl(timeControl);
-        if (clock) this.#game.setClock(clock);
+        if (clock) this.#game.setClock(clock, onClockFlag);
         this.#gameGUI.setGameStarted(true);
         if (clock) this.#game.startClock();
         this.#gameGUI.refreshControls();
